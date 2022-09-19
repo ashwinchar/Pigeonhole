@@ -1,6 +1,6 @@
 # Pigeonhole
 
-Contributors:
-Ashwin Char akc95@cornell.edu. 
-Arjun Mehta ahm247@cornell.edu. 
-Abhinav Goyal ag894@cornell.edu
+Contributors:</br>  
+Ashwin Char akc95@cornell.edu</br>
+Arjun Mehta ahm247@cornell.edu</br>
+Abhinav Goyal ag894@cornell.edu</br>
