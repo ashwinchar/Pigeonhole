@@ -1,2 +1,3 @@
 (library
- (name pigeonhole))
+ (name pigeonhole)
+ (libraries tsdl sdl2))
