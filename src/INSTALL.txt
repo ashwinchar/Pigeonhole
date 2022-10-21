@@ -1,1 +1,1 @@
-opam install tsdl
+opam install Ocamlsdl2
