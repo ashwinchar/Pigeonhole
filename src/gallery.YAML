@@ -1,0 +1,26 @@
+group:
+  - name: Arjun Mehta
+    netid: ahm247
+  - name: Abhinav Goyal
+    netid: ag894
+  - name: Kirti Dahal
+    netid: kkd26
+  - name: Ashwin Char
+    netid: akc95
+pm:
+  name: Jeff Zhou
+  netid: jlz45
+publish: true
+title: "Pigeonhole"
+git-repo: "https://github.com/ashwinchar/Pigeonhole"
+demo-video-url: ""
+desc: >
+  Our project is an game similar to Battleship. 
+  We have a 2-player game where both players try to drop birds into
+  hidden holes throughout a game board (5 x 5, 10 x 10, 15 x 15 
+  depending on difficulty mode) There are 5 different types of birds
+  given to each player, each with different values. If you drop the 
+  bird in a box you'll recieve the amount of points the bird is worth.
+  The player with the most points at the end wins. 
+
+  Our game is supported by graphics.
