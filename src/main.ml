@@ -2,7 +2,7 @@ open Graphics
 let rec horizontal_lines (count : int) (x : int) (y : int) (offset : int) = 
   if count = 0 then () 
   else (
-    moveto x y;
+    moveto x y ;
     lineto (size_x () - offset) y;
     horizontal_lines (count - 1) x (y + 50) offset
   )
@@ -13,15 +13,15 @@ let rec vertical_lines (count : int) (x : int) (y : int) (offset : int) =
     lineto x (size_y () - offset);
     vertical_lines (count - 1) (x + 50) y offset)
 
-let create_grid (x : int) (y : int) (offset : int) =
+let create_grid (x : int) (y : int) (vertical_offset : int) (horizontal_offset : int) =
   clear_graph ();
-  vertical_lines 10 x y offset;
-  horizontal_lines 10 x y offset
+  vertical_lines 11 x y vertical_offset;
+  horizontal_lines 11 x y horizontal_offset
 
 let rec interactive () =
   let event = wait_next_event [ Key_pressed ] in
   if event.key == 'q' then exit 0
-  else if event.key == 'p' then create_grid 0 0 20
+  else if event.key == 'p' then create_grid (size_x () / 8) (size_y () / 8) 130 550
   else print_char event.key;
   print_newline ();
   interactive ()
