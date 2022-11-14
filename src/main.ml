@@ -1,4 +1,5 @@
 open Graphics
+
 let rec horizontal_lines (count : int) (x : int) (y : int) (offset : int) = 
   if count = 0 then () 
   else (

@@ -9,3 +9,7 @@ play:
 
 clean:
 	dune clean
+
+zip:
+	rm -f Pigeonhole.zip
+	zip -r Pigeonhole.zip .
