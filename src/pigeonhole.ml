@@ -14,3 +14,8 @@ type bird = {
 
 type coordinate = char * int
 (** Type to identify tiles on the game board *)
+type grid_space = {
+  coordinate : coordinate;
+  occupied : bool; 
+  shot_at : bool 
+}
