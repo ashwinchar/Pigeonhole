@@ -1,3 +1,2 @@
 (executables
- (names main ray)
- (libraries raylib raygui graphics))
+ (names main))
