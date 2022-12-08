@@ -4,6 +4,7 @@ exception MalformedWindow of string
 
 let setup () =
   init_window 1000 900 "Pigeonhole";
+  (*toggle_fullscreen ();*)
   set_target_fps 60;
   set_mouse_scale 1. 1.;
   let card_img = load_image "img/cardinal.png" in
@@ -127,16 +128,19 @@ let update id =
       | I -> window_id := 6
       | _ -> ()
     end
-  | 1 -> if is_mouse_button_down MouseButton.Left then begin
-      match Vector2.x get_board_position, Vector2.y get_board_position with
-      | x, y -> if click_on_grid x y then print_endline "click on grid"
-    end
+  | 1 -> (
+      if is_mouse_button_down MouseButton.Left then
+        match (Vector2.x get_board_position, Vector2.y get_board_position) with
+        | x, y -> if click_on_grid x y then print_endline "click on grid")
   | 2 -> ()
   | 3 -> ()
-  | 4 -> begin
-      match Vector2.x get_board_position, Vector2.y get_board_position with
-      | _ -> ()(*print_endline ("click on grid" ^ string_of_float x ^ string_of_float y)*)
-    end
+  | 4 ->
+      print_endline
+        ("click on grid "
+        ^ string_of_int (get_mouse_x ())
+        ^ " "
+        ^ string_of_int (get_mouse_y ()))
+
   | 5 -> ()
   | 6 -> ()
   | _ -> raise (MalformedWindow "window out of range")
