@@ -1,6 +1,7 @@
 open Raylib
 
 exception MalformedWindow of string
+exception NotInGrid
 
 let setup () =
   init_window 1000 900 "Pigeonhole";
@@ -62,6 +63,78 @@ let create_grid (x : int) (y : int) =
   vertical_lines 11 x y (y + 500);
   horizontal_lines 11 x (x + 500) y
 
+let click_on_grid x y =
+  if x >= 100 && x <= 600 && y >= 100 && x <= 600 then true else false
+
+let get_board_position () = (get_mouse_x (), get_mouse_y ())
+
+let get_grid_coordinate x y =
+  let get_x_coord =
+    match x with
+    | z when z >= 100 && z <= 150 -> 'A'
+    | z when z > 150 && z <= 200 -> 'B'
+    | z when z > 200 && z <= 250 -> 'C'
+    | z when z > 250 && z <= 300 -> 'D'
+    | z when z > 300 && z <= 350 -> 'E'
+    | z when z > 350 && z <= 400 -> 'F'
+    | z when z > 400 && z <= 450 -> 'G'
+    | z when z > 450 && z <= 500 -> 'H'
+    | z when z > 500 && z <= 550 -> 'I'
+    | z when z > 550 && z <= 600 -> 'J'
+    | _ -> raise NotInGrid
+  in
+  let get_y_coord =
+    match y with
+    | z when z >= 100 && z <= 150 -> 0
+    | z when z > 150 && z <= 200 -> 1
+    | z when z > 200 && z <= 250 -> 2
+    | z when z > 250 && z <= 300 -> 3
+    | z when z > 300 && z <= 350 -> 4
+    | z when z > 350 && z <= 400 -> 5
+    | z when z > 400 && z <= 450 -> 6
+    | z when z > 450 && z <= 500 -> 7
+    | z when z > 500 && z <= 550 -> 8
+    | z when z > 550 && z <= 600 -> 9
+    | _ -> raise NotInGrid
+  in
+  (get_x_coord, get_y_coord)
+
+let get_center coord =
+  let x_center x =
+    match x with
+    | z when z = 'A' -> 125
+    | z when z = 'B' -> 175
+    | z when z = 'C' -> 225
+    | z when z = 'D' -> 275
+    | z when z = 'E' -> 325
+    | z when z = 'F' -> 375
+    | z when z = 'G' -> 425
+    | z when z = 'H' -> 475
+    | z when z = 'I' -> 525
+    | z when z = 'J' -> 575
+    | _ -> raise NotInGrid
+  in
+  let y_center y =
+    match y with
+    | z when z = 0 -> 125
+    | z when z = 1 -> 175
+    | z when z = 2 -> 225
+    | z when z = 3 -> 275
+    | z when z = 4 -> 325
+    | z when z = 5 -> 375
+    | z when z = 6 -> 425
+    | z when z = 7 -> 475
+    | z when z = 8 -> 525
+    | z when z = 9 -> 575
+    | _ -> raise NotInGrid
+  in
+  match coord with
+  | x', y' -> (x_center x', y_center y')
+
+let draw_hole coord () =
+  match get_center coord with
+  | x, y -> draw_circle x y 10. Color.black
+
 let draw_main_page () =
   clear_background Color.orange;
   draw_text "Pigeonhole" 220 300 100 Color.raywhite;
@@ -99,13 +172,6 @@ let draw_player_2 bird_textures () =
 
 let draw_switch () = clear_background Color.raywhite
 
-let click_on_grid x y =
-  if x >= 100. && x <= 600. && y >= 100. && x <= 600. then true else false
-
-let get_board_position =
-  print_endline (string_of_int (get_mouse_x ()));
-  get_mouse_position ()
-
 (*Need to add commands for drawing birds and uncovered holes and whatnot*)
 let draw_window bird_textures id =
   window_in_bounds id;
@@ -119,6 +185,8 @@ let draw_window bird_textures id =
   | 6 -> draw_instructions ()
   | _ -> raise (MalformedWindow "window out of range")
 
+let pp_int_pair ppf (x, y) = Printf.fprintf ppf "(%c,%d)" x y
+
 let update id =
   match id with
   | 0 -> begin
@@ -127,16 +195,19 @@ let update id =
       | I -> window_id := 6
       | _ -> ()
     end
-  | 1 -> if is_mouse_button_down MouseButton.Left then begin
-      match Vector2.x get_board_position, Vector2.y get_board_position with
-      | x, y -> if click_on_grid x y then print_endline "click on grid"
-    end
+  | 1 -> ()
   | 2 -> ()
   | 3 -> ()
-  | 4 -> begin
-      match Vector2.x get_board_position, Vector2.y get_board_position with
-      | _ -> ()(*print_endline ("click on grid" ^ string_of_float x ^ string_of_float y)*)
-    end
+  | 4 -> (
+      if is_mouse_button_down MouseButton.Left then
+        match get_board_position () with
+        | x, y ->
+            if click_on_grid x y then
+              print_endline
+                ("Click on: " ^ string_of_int x ^ " " ^ string_of_int y);
+            print_endline "Grid Position: ";
+            Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
+            draw_hole (get_grid_coordinate x y) ())
   | 5 -> ()
   | 6 -> ()
   | _ -> raise (MalformedWindow "window out of range")
