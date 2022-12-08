@@ -1,1 +1,2 @@
-opam install graphics
+opam install raylib
+opam install raygui
