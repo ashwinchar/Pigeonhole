@@ -2,7 +2,7 @@ type bird_species =
   | Pigeon
   | Cardinal
   | Owl
-  | BlueJay
+  | Eagle
   | KingFisher  (** The type of bird that the player can "shoot" into a hole *)
 
 type bird = {
