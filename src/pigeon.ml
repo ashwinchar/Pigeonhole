@@ -16,11 +16,17 @@ type grid_square = {
   shot_at : bool;
 }
 
-type coord = string
+type coord = char * int
 (** Type to identify tiles on the game board *)
 
-let rows = [| 'a'; 'b'; 'c'; 'd'; 'e'; 'f'; 'g'; 'h'; 'i'; 'j' |]
-let columns = [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 |]
+let rows = [ 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 ]
+let columns = [ 'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'; 'I'; 'J' ]
+
+exception HoleHere
+(** Raised when a hole is already placed at given coordinates. *)
+
+exception Malformed
+(** Raised when there is an invalid command. *)
 
 module BirdMapping = struct
   type t = (coord * grid_square) list
@@ -41,7 +47,7 @@ module BirdMapping = struct
     | [] -> [ (k, v) ]
     | (k', v') :: t -> if k = k' then (k, v) :: t else (k', v') :: insert k v t
 
-  let empty d = d = []
+  let is_empty d = d = []
   let empty = []
 
   let rec mem k m =
@@ -59,3 +65,49 @@ type grid_opponent = {
   grid : BirdMapping.t;
   mutable score : int;
 }
+
+let rec pair (row : int list) (col : char) (out : (coord * grid_square) list) =
+  match row with
+  | [] -> out
+  | h :: t ->
+      pair t col
+        (BirdMapping.insert (col, h) { occupied = false; shot_at = false } out)
+
+let rec init_grid (row : int list) (col : char list)
+    (out : (coord * grid_square) list) =
+  match col with
+  | [] -> out
+  | h :: t -> init_grid row t (pair row h [] @ out)
+
+let rec make_grid hole hole_coords grid out =
+  match grid with
+  | [] -> out
+  | (coord, { occupied = false; shot_at }) :: t ->
+      if BirdMapping.mem coord hole_coords then
+        make_grid hole hole_coords t
+          (BirdMapping.insert coord { occupied = true; shot_at } out)
+      else
+        make_grid hole hole_coords t
+          (BirdMapping.insert coord { occupied = false; shot_at } out)
+  | (coord, { occupied = true; shot_at }) :: t ->
+      if BirdMapping.mem coord hole_coords then raise HoleHere
+      else
+        make_grid hole hole_coords t
+          (BirdMapping.insert coord { occupied = true; shot_at } out)
+  | _ -> raise Malformed
+
+let rec get_col_list (row : int list) (col : char) (row1 : int) (row2 : int) out
+    =
+  match row with
+  | [] -> out
+  | h :: t when h >= row1 && h <= row2 ->
+      get_col_list t col row1 row2 ((h, col) :: out)
+  | h :: t -> get_col_list t col row1 row2 out
+
+let rec get_row_list (row : int) (col : char list) (col1 : char) (col2 : char)
+    outlist =
+  match col with
+  | [] -> outlist
+  | h :: t when h >= col1 && h <= col2 ->
+      get_row_list row t col1 col2 ((row, h) :: outlist)
+  | h :: t -> get_row_list row t col1 col2 outlist
