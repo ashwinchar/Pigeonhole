@@ -78,10 +78,22 @@ and highlight_bird y () =
         500
     | _ -> raise NotBird
   in
-  draw_line 750 get_y_coord 850 get_y_coord Color.orange;
-  draw_line 750 (get_y_coord + 100) 850 (get_y_coord + 100) Color.orange;
-  draw_line 750 get_y_coord 750 (get_y_coord + 100) Color.orange;
-  draw_line 850 get_y_coord 850 (get_y_coord + 100) Color.orange
+  draw_line_ex
+    (Vector2.create 750.0 (float_of_int get_y_coord))
+    (Vector2.create 850.0 (float_of_int get_y_coord))
+    10.0 Color.orange;
+  draw_line_ex
+    (Vector2.create 750.0 (float_of_int (get_y_coord + 100)))
+    (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
+    10.0 Color.orange;
+  draw_line_ex
+    (Vector2.create 750.0 (float_of_int get_y_coord))
+    (Vector2.create 750.0 (float_of_int (get_y_coord + 100)))
+    10.0 Color.orange;
+  draw_line_ex
+    (Vector2.create 850.0 (float_of_int get_y_coord))
+    (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
+    10.0 Color.orange
 
 let window_in_bounds win =
   if win < 0 && win > 6 then raise (MalformedWindow "window id out of range")
