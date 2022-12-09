@@ -8,6 +8,7 @@ type bird_species =
 type bird = {
   species : bird_species;
   points : int;
+  birds_left : int;
 }
 (** The type of bird that contains the following fields: species, size, hits *)
 

@@ -205,9 +205,9 @@ let draw_instructions () =
      with each species worth a different number of points. If a\n\
      hole is hit by a specific bird, the worth of that bird is added\n\
      to the player's score. There are 5 species of birds with the\n\
-     following values: Pigeon - 1, Cardinal - 5, Owl - 10, Eagle - 25,\n\
-     KingFisher - 50. Each player is given 25 Pigeons, 10\n\
-     Cardinals, 8 Owls, 5 Eagles, and 2 KingFishers" 50 50 30 Color.raywhite;
+     following values: Pigeon - 10, Cardinal - 50, Owl - 100, Eagle - 250,\n\
+     KingFisher - 500. Each player is given 50 Pigeons, 25\n\
+     Cardinals, 14 Owls, 8 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
   draw_text "Press P to play" 350 650 30 Color.raywhite
 
 let draw_player_1_setup () =
