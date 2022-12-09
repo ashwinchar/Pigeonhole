@@ -37,21 +37,51 @@ let setup () =
     pigeon_texture; card_texture; owl_texture; eagle_texture; kingfisher_texture;
   ]
 
+type hl_box =
+  | None
+  | Some of int
+
 let window_id = ref 0
-let highlighted = ref false
+let highlighted_box = ref None
 
 let rec draw_birds bird_textures y () =
-  if !highlighted = false then (
-    match bird_textures with
-    | [] -> ()
-    | h :: t ->
-        draw_texture h 750 y Color.raywhite;
-        draw_line 750 y 850 y Color.black;
-        draw_line 750 (y + 100) 850 (y + 100) Color.black;
-        draw_line 750 y 750 (y + 100) Color.black;
-        draw_line 850 y 850 (y + 100) Color.black;
-        draw_birds t (y + 100) ())
-  else ()
+  match bird_textures with
+  | [] -> ()
+  | h :: t ->
+      (draw_texture h 750 y Color.raywhite;
+       draw_line 750 y 850 y Color.black;
+       draw_line 750 (y + 100) 850 (y + 100) Color.black;
+       draw_line 750 y 750 (y + 100) Color.black;
+       draw_line 850 y 850 (y + 100) Color.black;
+       match !highlighted_box with
+       | None -> ()
+       | Some x -> highlight_bird x ());
+      draw_birds t (y + 100) ()
+
+and highlight_bird y () =
+  let get_y_coord =
+    match y with
+    | z when z >= 100 && z < 200 ->
+        highlighted_box := Some 100;
+        100
+    | z when z >= 200 && z < 300 ->
+        highlighted_box := Some 200;
+        200
+    | z when z >= 300 && z < 400 ->
+        highlighted_box := Some 300;
+        300
+    | z when z >= 400 && z < 500 ->
+        highlighted_box := Some 400;
+        400
+    | z when z >= 500 && z < 600 ->
+        highlighted_box := Some 500;
+        500
+    | _ -> raise NotBird
+  in
+  draw_line 750 get_y_coord 850 get_y_coord Color.orange;
+  draw_line 750 (get_y_coord + 100) 850 (get_y_coord + 100) Color.orange;
+  draw_line 750 get_y_coord 750 (get_y_coord + 100) Color.orange;
+  draw_line 850 get_y_coord 850 (get_y_coord + 100) Color.orange
 
 let window_in_bounds win =
   if win < 0 && win > 6 then raise (MalformedWindow "window id out of range")
@@ -77,22 +107,6 @@ let click_on_grid x y =
 
 let click_on_birds x y =
   if x >= 750 && x <= 850 && y >= 100 && y <= 600 then true else false
-
-let highlight_bird y =
-  let get_y_coord =
-    match y with
-    | z when z >= 100 && z < 200 -> 100
-    | z when z >= 200 && z < 300 -> 200
-    | z when z >= 300 && z < 400 -> 300
-    | z when z >= 400 && z < 500 -> 400
-    | z when z >= 500 && z < 600 -> 500
-    | _ -> raise NotBird
-  in
-  highlighted := true;
-  draw_line 750 get_y_coord 850 get_y_coord Color.orange;
-  draw_line 750 (get_y_coord + 100) 850 (get_y_coord + 100) Color.orange;
-  draw_line 750 get_y_coord 750 (get_y_coord + 100) Color.orange;
-  draw_line 850 get_y_coord 850 (get_y_coord + 100) Color.orange
 
 let get_board_position () = (get_mouse_x (), get_mouse_y ())
 
@@ -238,7 +252,7 @@ let update id =
   | 1 -> (
       if is_mouse_button_down MouseButton.Left then
         match get_board_position () with
-        | x, y -> if click_on_birds x y then highlight_bird y)
+        | x, y -> if click_on_birds x y then highlight_bird y ())
   | 2 -> ()
   | 3 -> ()
   | 4 -> (
