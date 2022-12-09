@@ -1,3 +1,3 @@
-(executables
- (names ray)
+(executable
+ (name ray)
  (libraries raylib raygui PigeonholeGame))
