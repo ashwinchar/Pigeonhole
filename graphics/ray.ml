@@ -1,8 +1,9 @@
 open Raylib
+open Pigeonholegame
+open Pigeon
 
 exception MalformedWindow of string
 exception NotInGrid
-exception NotBird
 
 let setup () =
   init_window 1000 900 "Pigeonhole";
@@ -37,20 +38,13 @@ let setup () =
   ]
 
 let window_id = ref 0
-let highlighted = ref false
 
 let rec draw_birds bird_textures y () =
-  if !highlighted = false then (
-    match bird_textures with
-    | [] -> ()
-    | h :: t ->
-        draw_texture h 750 y Color.raywhite;
-        draw_line 750 y 850 y Color.black;
-        draw_line 750 (y + 100) 850 (y + 100) Color.black;
-        draw_line 750 y 750 (y + 100) Color.black;
-        draw_line 850 y 850 (y + 100) Color.black;
-        draw_birds t (y + 100) ())
-  else ()
+  match bird_textures with
+  | [] -> ()
+  | h :: t ->
+      draw_texture h 750 y Color.raywhite;
+      draw_birds t (y + 100) ()
 
 let window_in_bounds win =
   if win < 0 && win > 6 then raise (MalformedWindow "window id out of range")
@@ -73,25 +67,6 @@ let create_grid (x : int) (y : int) =
 
 let click_on_grid x y =
   if x >= 100 && x <= 600 && y >= 100 && x <= 600 then true else false
-
-let click_on_birds x y =
-  if x >= 750 && x <= 850 && y >= 100 && y <= 600 then true else false
-
-let highlight_bird y =
-  let get_y_coord =
-    match y with
-    | z when z >= 100 && z < 200 -> 100
-    | z when z >= 200 && z < 300 -> 200
-    | z when z >= 300 && z < 400 -> 300
-    | z when z >= 400 && z < 500 -> 400
-    | z when z >= 500 && z < 600 -> 500
-    | _ -> raise NotBird
-  in
-  highlighted := true;
-  draw_line 750 get_y_coord 850 get_y_coord Color.orange;
-  draw_line 750 (get_y_coord + 100) 850 (get_y_coord + 100) Color.orange;
-  draw_line 750 get_y_coord 750 (get_y_coord + 100) Color.orange;
-  draw_line 850 get_y_coord 850 (get_y_coord + 100) Color.orange
 
 let get_board_position () = (get_mouse_x (), get_mouse_y ())
 
@@ -171,19 +146,19 @@ let draw_main_page () =
 let draw_instructions () =
   clear_background Color.orange;
   draw_text
-    "Instructions: Please click where you would like to place your\n\
-     10 holes on the grid. After choosing your holes, pass this\n\
-     computer onto the other player and let them choose their\n\
-     10 holes. Each person will be given a certain number of birds,\n\
-     with each species worth a different number of points. If a\n\
-     hole is hit by a specific bird, the worth of that bird is added\n\
-     to the player's score. There are 5 species of birds with the\n\
-     following values: Pigeon - 1, Cardinal - 5, Owl - 10, Eagle - 25,\n\
-     KingFisher - 50. Each player is given 25 Pigeons, 10\n\
-     Cardinals, 8 Owls, 5 Eagles, and 2 KingFishers" 50 50 30 Color.raywhite;
-  draw_text "Press P to play" 350 650 30 Color.raywhite
+    "Instructions: Please click where you would like to place your 10 holes on \
+     the grid. After choosing your holes, pass this computer onto the other \
+     player and let them choose their 10 holes. Each person will be given a \
+     certain number of birds, with each species worth a different number of \
+     points. If a hole is hit by a specific bird, the worth of that bird is \
+     added to the player's score. There are 5 species of birds with the \
+     following values: Pigeon - 1, Cardinal - 5, Owl - 10, Eagle - 25, \
+     KingFisher - 50. Each player is given 25 Pigeons, 10 Cardinals, 8 Owls, 5 \
+     Eagles, and 2 KingFishers"
+    300 400 30 Color.raywhite
 
 let draw_player_1_setup () =
+  clear_background Color.raywhite;
   create_grid 100 100;
   draw_text
     "Select 10 grid spaces to place your pigeon holes\n\
@@ -228,16 +203,11 @@ let update id =
   match id with
   | 0 -> begin
       match get_key_pressed () with
-      | P ->
-          clear_background Color.raywhite;
-          window_id := 1
+      | P -> window_id := 4
       | I -> window_id := 6
       | _ -> ()
     end
-  | 1 -> (
-      if is_mouse_button_down MouseButton.Left then
-        match get_board_position () with
-        | x, y -> if click_on_birds x y then highlight_bird y)
+  | 1 -> ()
   | 2 -> ()
   | 3 -> ()
   | 4 -> (
@@ -251,13 +221,7 @@ let update id =
               Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
               draw_hole (get_grid_coordinate x y) ()))
   | 5 -> ()
-  | 6 -> begin
-      match get_key_pressed () with
-      | P ->
-          clear_background Color.raywhite;
-          window_id := 1
-      | _ -> ()
-    end
+  | 6 -> ()
   | _ -> raise (MalformedWindow "window out of range")
 
 let rec main_loop () bird_textures =

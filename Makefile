@@ -5,7 +5,7 @@ test:
 	OCAMLRUNPARAM=b dune exec test/main.exe
 
 play:
-	OCAMLRUNPARAM=b dune exec src/ray.exe
+	OCAMLRUNPARAM=b dune exec graphics/ray.exe
 
 clean:
 	dune clean
