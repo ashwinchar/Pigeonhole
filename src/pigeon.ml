@@ -80,20 +80,20 @@ let rec init_grid (row : int list) (col : char list)
   | [] -> out
   | h :: t -> init_grid row t (pair row h [] @ out)
 
-let rec make_grid hole hole_coords grid out =
+let rec make_grid hole_coords grid out =
   match grid with
   | [] -> out
   | (coord, { occupied = false; shot_at }) :: t ->
       if BirdMapping.mem coord hole_coords then
-        make_grid hole hole_coords t
+        make_grid hole_coords t
           (BirdMapping.insert coord { occupied = true; shot_at } out)
       else
-        make_grid hole hole_coords t
+        make_grid hole_coords t
           (BirdMapping.insert coord { occupied = false; shot_at } out)
   | (coord, { occupied = true; shot_at }) :: t ->
       if BirdMapping.mem coord hole_coords then raise HoleHere
       else
-        make_grid hole hole_coords t
+        make_grid hole_coords t
           (BirdMapping.insert coord { occupied = true; shot_at } out)
   | _ -> raise Malformed
 
