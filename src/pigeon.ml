@@ -57,16 +57,6 @@ module BirdMapping = struct
     | (k', _) :: t -> if k' = k then true else mem k t
 end
 
-type grid_player = {
-  grid : BirdMapping.t;
-  mutable score : int;
-}
-
-type grid_opponent = {
-  grid : BirdMapping.t;
-  mutable score : int;
-}
-
 let rec pair (row : int list) (col : char) (out : (coord * grid_square) list) =
   match row with
   | [] -> out

@@ -35,16 +35,6 @@ module BirdMapping : sig
   val mem : 'a -> ('a * 'b) list -> bool
 end
 
-type grid_player = {
-  grid : BirdMapping.t;
-  mutable score : int;
-}
-
-type grid_opponent = {
-  grid : BirdMapping.t;
-  mutable score : int;
-}
-
 val pair :
   int list -> char -> (coord * grid_square) list -> (coord * grid_square) list
 

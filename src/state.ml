@@ -1,10 +1,14 @@
 open Pigeon
 
+exception TurnException
+
 type state = {
   bird_list : bird list;
   grid : BirdMapping.t;
   holes_on_board : int;
   hit_list : coord list;
+  has_turn : bool;
+  score : int;
 }
 
 let init_pigeons = { species = Pigeon; points = 10; birds_left = 50 }
@@ -22,6 +26,8 @@ let init_state =
     grid = Pigeon.init_grid Pigeon.rows Pigeon.columns [];
     holes_on_board = 0;
     hit_list = [];
+    has_turn = true;
+    score = 0;
   }
 
 let set_hole coord state =
@@ -31,6 +37,8 @@ let set_hole coord state =
       grid = make_grid [ coord ] state.grid [];
       holes_on_board = state.holes_on_board + 1;
       hit_list = [];
+      has_turn = true;
+      score = 0;
     }
   else
     {
@@ -38,6 +46,8 @@ let set_hole coord state =
       grid = state.grid;
       holes_on_board = state.holes_on_board;
       hit_list = [];
+      has_turn = true;
+      score = 0;
     }
 
 let rec update_bird_list bird bird_list res =
@@ -74,3 +84,18 @@ let rec can_shoot bird row col grid =
   | ((row', col'), { occupied; shot_at = true }) :: t
     when row = row' && col = col' -> false
   | ((row', col'), { occupied; shot_at }) :: t -> can_shoot bird row col t
+
+let switch_turn state_1 state_2 =
+  match state_1.has_turn with
+  | true -> begin
+      match state_2.has_turn with
+      | true -> raise TurnException
+      | false ->
+          ({ state_1 with has_turn = false }, { state_2 with has_turn = true })
+    end
+  | false -> begin
+      match state_2.has_turn with
+      | true ->
+          ({ state_1 with has_turn = true }, { state_2 with has_turn = false })
+      | false -> raise TurnException
+    end

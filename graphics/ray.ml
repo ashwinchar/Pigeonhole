@@ -50,7 +50,7 @@ let setup () =
         eagle_texture;
         kingfisher_texture;
       ];
-    p1_state = init_state;
+    p1_state = { init_state with has_turn = false };
     p2_state = init_state;
   }
 
@@ -235,31 +235,53 @@ let draw_player_1_setup () =
      After clicking on a grid space it cannot be changed\n\
      so choose carefully." 100 700 30 Color.black;
   draw_rectangle 675 300 250 100 Color.green;
-  draw_text "Randomize" 725 335 30 Color.black
+  draw_text "Randomize" 725 335 30 Color.black;
+  draw_text "Player 1" 675 100 60 Color.red
 
 let draw_player_2_setup () =
-  clear_background Color.raywhite;
-  create_grid 100 100
+  create_grid 100 100;
+  draw_text
+    "Select 10 grid spaces to place your pigeon holes\n\
+     or choose the random selection button. \n\
+     After clicking on a grid space it cannot be changed\n\
+     so choose carefully." 100 700 30 Color.black;
+  draw_rectangle 675 300 250 100 Color.green;
+  draw_text "Randomize" 725 335 30 Color.black;
+  draw_text "Player 2" 675 100 60 Color.blue
 
-let draw_player_1 bird_textures () =
+let draw_score_board p1_state p2_state () =
+  draw_rectangle 100 650 500 200 Color.lightgray;
+  draw_text "Scoreboard: " 100 650 40 Color.black;
+  draw_text ("Player 1: " ^ string_of_int p1_state.score) 100 700 40 Color.red;
+  draw_text ("Player 2: " ^ string_of_int p2_state.score) 100 750 40 Color.blue
+
+let draw_player_1 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
   create_grid 100 100;
-  draw_birds bird_textures 100 ()
+  draw_birds bird_textures 100 ();
+  draw_text "Player 1" 10 10 30 Color.red;
+  draw_score_board p1_state p2_state ()
 
-let draw_player_2 bird_textures () =
+let draw_player_2 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
   create_grid 100 100;
-  draw_birds bird_textures 100 ()
+  draw_birds bird_textures 100 ();
+  draw_text "Player 2" 10 10 30 Color.blue;
+  draw_score_board p1_state p2_state ()
 
-let draw_switch () = clear_background Color.raywhite
+let draw_switch () =
+  clear_background Color.green;
+  draw_text "pass computer" 300 350 60 Color.white;
+  draw_text "to opponent" 325 420 60 Color.white;
+  draw_text "press enter to continue" 270 700 40 Color.white
 
 (*Need to add commands for drawing birds and uncovered holes and whatnot*)
 let draw_window bird_textures id p1_state p2_state =
   window_in_bounds id;
   match id with
   | 0 -> draw_main_page ()
-  | 1 -> draw_player_1 bird_textures ()
-  | 2 -> draw_player_2 bird_textures ()
+  | 1 -> draw_player_1 bird_textures p1_state p2_state ()
+  | 2 -> draw_player_2 bird_textures p1_state p2_state ()
   | 3 -> draw_switch ()
   | 4 -> draw_player_1_setup ()
   | 5 -> draw_player_2_setup ()
@@ -267,6 +289,22 @@ let draw_window bird_textures id p1_state p2_state =
   | _ -> raise (MalformedWindow "window out of range")
 
 let pp_int_pair ppf (x, y) = Printf.fprintf ppf "(%c,%d)" x y
+
+let update_set_holes x y player_state opponent_state next_window =
+  if click_on_grid x y then (
+    print_endline ("Click on: " ^ string_of_int x ^ " " ^ string_of_int y);
+    print_endline "Grid Position: ";
+    Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
+    print_int player_state.holes_on_board;
+    if player_state.holes_on_board < 10 then (
+      draw_hole (get_grid_coordinate x y) ();
+      if player_state.holes_on_board = 9 then (
+        window_id := next_window;
+        clear_background Color.raywhite;
+        (set_hole (get_grid_coordinate x y) player_state, opponent_state))
+      else (set_hole (get_grid_coordinate x y) player_state, opponent_state))
+    else (player_state, opponent_state))
+  else (player_state, opponent_state)
 
 let update id p1_state p2_state =
   match id with
@@ -277,36 +315,55 @@ let update id p1_state p2_state =
           window_id := 4;
           (p1_state, p2_state)
       | I ->
-          window_id := 6;
+          window_id := 3;
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
     end
   | 1 ->
-      if is_mouse_button_down MouseButton.Left then (
+      if is_mouse_button_down MouseButton.Left then
         match get_board_position () with
-        | x, y ->
-            if click_on_birds x y then highlight_bird y ();
-            (p1_state, p2_state))
+        | x, y when click_on_birds x y ->
+            highlight_bird y ();
+            (p1_state, p2_state)
+        | x, y when click_on_grid x y ->
+            window_id := 3;
+            (p1_state, p2_state)
+        | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
-  | 2 -> (p1_state, p2_state)
-  | 3 -> (p1_state, p2_state)
+  | 2 ->
+      if is_mouse_button_down MouseButton.Left then
+        match get_board_position () with
+        | x, y when click_on_birds x y ->
+            highlight_bird y ();
+            (p1_state, p2_state)
+        | x, y when click_on_grid x y ->
+            window_id := 3;
+            (p1_state, p2_state)
+        | x, y -> (p1_state, p2_state)
+      else (p1_state, p2_state)
+  | 3 -> (
+      match get_key_pressed () with
+      | Enter ->
+          begin
+            match p1_state.has_turn with
+            | true -> window_id := 2
+            | false -> window_id := 1
+          end;
+          clear_background Color.raywhite;
+          switch_turn p1_state p2_state
+      | _ -> (p1_state, p2_state))
   | 4 ->
       if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
-        | x, y ->
-            if click_on_grid x y then (
-              print_endline
-                ("Click on: " ^ string_of_int x ^ " " ^ string_of_int y);
-              print_endline "Grid Position: ";
-              Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
-              print_int p1_state.holes_on_board;
-              if p1_state.holes_on_board < 10 then (
-                draw_hole (get_grid_coordinate x y) ();
-                (set_hole (get_grid_coordinate x y) p1_state, p2_state))
-              else (p1_state, p2_state))
-            else (p1_state, p2_state)
+        | x, y -> update_set_holes x y p1_state p2_state 5
       else (p1_state, p2_state)
-  | 5 -> (p1_state, p2_state)
+  | 5 ->
+      if is_mouse_button_pressed MouseButton.Left then
+        match get_board_position () with
+        | x, y ->
+            ( snd (update_set_holes x y p1_state p2_state 3),
+              fst (update_set_holes x y p1_state p2_state 3) )
+      else (p1_state, p2_state)
   | 6 -> begin
       match get_key_pressed () with
       | P ->
