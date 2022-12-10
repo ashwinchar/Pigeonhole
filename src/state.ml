@@ -14,13 +14,14 @@ type state = {
   has_turn : bool;
   score : int;
   mode : game_mode;
+  selected_bird : bird_species;
 }
 
-let init_pigeons = { species = Pigeon; points = 10; birds_left = 50 }
-let init_cards = { species = Cardinal; points = 50; birds_left = 25 }
-let init_owls = { species = Owl; points = 100; birds_left = 14 }
-let init_eagles = { species = Eagle; points = 250; birds_left = 8 }
-let init_kingfisher = { species = KingFisher; points = 500; birds_left = 4 }
+let init_pigeons = { species = PigeonBird; points = 10; birds_left = 50 }
+let init_cards = { species = CardinalBird; points = 50; birds_left = 25 }
+let init_owls = { species = OwlBird; points = 100; birds_left = 14 }
+let init_eagles = { species = EagleBird; points = 250; birds_left = 8 }
+let init_kingfisher = { species = KingFisherBird; points = 500; birds_left = 4 }
 
 let init_birds =
   [ init_pigeons; init_cards; init_owls; init_eagles; init_kingfisher ]
@@ -34,6 +35,7 @@ let init_state =
     has_turn = true;
     score = 0;
     mode = Setup;
+    selected_bird = NoBird;
   }
 
 let set_hole coord state =
@@ -48,6 +50,7 @@ let set_hole coord state =
           has_turn = state.has_turn;
           score = 0;
           mode = Setup;
+          selected_bird = NoBird;
         }
       else
         {
@@ -58,6 +61,7 @@ let set_hole coord state =
           has_turn = state.has_turn;
           score = 0;
           mode = Setup;
+          selected_bird = NoBird;
         }
   | None ->
       {
@@ -68,6 +72,7 @@ let set_hole coord state =
         has_turn = state.has_turn;
         score = 0;
         mode = Setup;
+        selected_bird = NoBird;
       }
 
 let rec update_bird_list bird bird_list res =

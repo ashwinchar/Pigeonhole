@@ -1,9 +1,10 @@
 type bird_species =
-  | Pigeon
-  | Cardinal
-  | Owl
-  | Eagle
-  | KingFisher  (** The type of bird that the player can "shoot" into a hole *)
+  | PigeonBird
+  | CardinalBird
+  | OwlBird
+  | EagleBird
+  | KingFisherBird
+  | NoBird  (** The type of bird that the player can "shoot" into a hole *)
 
 type bird = {
   species : bird_species;

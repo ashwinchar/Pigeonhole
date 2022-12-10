@@ -202,9 +202,70 @@ let get_center coord =
   match coord with
   | x', y' -> (x_center x', y_center y')
 
+let get_corner coord =
+  let x_corner x =
+    match x with
+    | z when z = 'A' -> 100
+    | z when z = 'B' -> 150
+    | z when z = 'C' -> 200
+    | z when z = 'D' -> 250
+    | z when z = 'E' -> 300
+    | z when z = 'F' -> 350
+    | z when z = 'G' -> 400
+    | z when z = 'H' -> 450
+    | z when z = 'I' -> 500
+    | z when z = 'J' -> 550
+    | _ -> raise NotInGrid
+  in
+  let y_corner y =
+    match y with
+    | z when z = 0 -> 100
+    | z when z = 1 -> 150
+    | z when z = 2 -> 200
+    | z when z = 3 -> 250
+    | z when z = 4 -> 300
+    | z when z = 5 -> 350
+    | z when z = 6 -> 400
+    | z when z = 7 -> 450
+    | z when z = 8 -> 500
+    | z when z = 9 -> 550
+    | _ -> raise NotInGrid
+  in
+  match coord with
+  | x', y' -> (x_corner x', y_corner y')
+
+let get_bird_selection x y =
+  if click_on_birds x y then
+    match y with
+    | z when z >= 100 && z < 200 -> PigeonBird
+    | z when z >= 200 && z < 300 -> CardinalBird
+    | z when z >= 300 && z < 400 -> OwlBird
+    | z when z >= 400 && z < 500 -> EagleBird
+    | z when z >= 500 && z < 600 -> KingFisherBird
+    | z -> NoBird
+  else NoBird
+
 let draw_hole coord () =
   match get_center coord with
   | x, y -> draw_circle x y 10. Color.black
+
+let rec draw_grid grid () =
+  match grid with
+  | [] -> ()
+  | (coord, { occupied = true; shot_at = true }) :: t ->
+      draw_rectangle
+        (fst (get_corner coord))
+        (snd (get_corner coord))
+        50 50 Color.green;
+      draw_hole coord ();
+      draw_grid t ()
+  | (coord, { occupied = false; shot_at = true }) :: t ->
+      draw_rectangle
+        (fst (get_corner coord))
+        (snd (get_corner coord))
+        50 50 Color.green;
+      draw_grid t ()
+  | (coord, { occupied; shot_at }) :: t -> draw_grid t ()
 
 let draw_main_page () =
   clear_background Color.orange;
@@ -267,14 +328,16 @@ let draw_player_1 bird_textures p1_state p2_state () =
   create_grid 100 100;
   draw_birds bird_textures 100 ();
   draw_text "Player 1" 10 10 30 Color.red;
-  draw_score_board p1_state p2_state ()
+  draw_score_board p1_state p2_state ();
+  draw_grid p1_state.grid ()
 
 let draw_player_2 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
   create_grid 100 100;
   draw_birds bird_textures 100 ();
   draw_text "Player 2" 10 10 30 Color.blue;
-  draw_score_board p1_state p2_state ()
+  draw_score_board p1_state p2_state ();
+  draw_grid p2_state.grid ()
 
 let draw_switch () =
   clear_background Color.green;
@@ -335,7 +398,7 @@ let update id p1_state p2_state =
         match get_board_position () with
         | x, y when click_on_birds x y ->
             highlight_bird y ();
-            (p1_state, p2_state)
+            ({ p1_state with selected_bird = get_bird_selection x y }, p2_state)
         | x, y when click_on_grid x y ->
             window_id := 3;
             (p1_state, p2_state)
@@ -346,7 +409,7 @@ let update id p1_state p2_state =
         match get_board_position () with
         | x, y when click_on_birds x y ->
             highlight_bird y ();
-            (p1_state, p2_state)
+            (p1_state, { p2_state with selected_bird = get_bird_selection x y })
         | x, y when click_on_grid x y ->
             window_id := 3;
             (p1_state, p2_state)

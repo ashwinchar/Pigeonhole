@@ -1,9 +1,10 @@
 type bird_species =
-  | Pigeon
-  | Cardinal
-  | Owl
-  | Eagle
-  | KingFisher
+  | PigeonBird
+  | CardinalBird
+  | OwlBird
+  | EagleBird
+  | KingFisherBird
+  | NoBird
 
 type bird = {
   species : bird_species;
