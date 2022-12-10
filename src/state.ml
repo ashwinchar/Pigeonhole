@@ -2,6 +2,10 @@ open Pigeon
 
 exception TurnException
 
+type game_mode =
+  | Setup
+  | Gameplay
+
 type state = {
   bird_list : bird list;
   grid : BirdMapping.t;
@@ -9,6 +13,7 @@ type state = {
   hit_list : coord list;
   has_turn : bool;
   score : int;
+  mode : game_mode;
 }
 
 let init_pigeons = { species = Pigeon; points = 10; birds_left = 50 }
@@ -28,27 +33,42 @@ let init_state =
     hit_list = [];
     has_turn = true;
     score = 0;
+    mode = Setup;
   }
 
 let set_hole coord state =
-  if state.holes_on_board < 10 then
-    {
-      bird_list = init_birds;
-      grid = make_grid [ coord ] state.grid [];
-      holes_on_board = state.holes_on_board + 1;
-      hit_list = [];
-      has_turn = true;
-      score = 0;
-    }
-  else
-    {
-      bird_list = init_birds;
-      grid = state.grid;
-      holes_on_board = state.holes_on_board;
-      hit_list = [];
-      has_turn = true;
-      score = 0;
-    }
+  match BirdMapping.find coord state.grid with
+  | Some x ->
+      if state.holes_on_board < 10 && x.occupied = false then
+        {
+          bird_list = init_birds;
+          grid = make_grid [ coord ] state.grid [];
+          holes_on_board = state.holes_on_board + 1;
+          hit_list = [];
+          has_turn = state.has_turn;
+          score = 0;
+          mode = Setup;
+        }
+      else
+        {
+          bird_list = init_birds;
+          grid = state.grid;
+          holes_on_board = state.holes_on_board;
+          hit_list = [];
+          has_turn = state.has_turn;
+          score = 0;
+          mode = Setup;
+        }
+  | None ->
+      {
+        bird_list = init_birds;
+        grid = state.grid;
+        holes_on_board = state.holes_on_board;
+        hit_list = [];
+        has_turn = state.has_turn;
+        score = 0;
+        mode = Setup;
+      }
 
 let rec update_bird_list bird bird_list res =
   match bird_list with
@@ -99,3 +119,12 @@ let switch_turn state_1 state_2 =
           ({ state_1 with has_turn = true }, { state_2 with has_turn = false })
       | false -> raise TurnException
     end
+
+let switch_mode state_1 state_2 =
+  match state_1.mode with
+  | Setup ->
+      if state_2.has_turn then
+        ( { state_1 with mode = Gameplay; has_turn = true },
+          { state_2 with mode = Gameplay; has_turn = false } )
+      else ({ state_1 with mode = Gameplay }, { state_2 with mode = Gameplay })
+  | Gameplay -> ({ state_1 with mode = Setup }, { state_2 with mode = Setup })
