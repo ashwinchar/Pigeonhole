@@ -310,6 +310,7 @@ let draw_instructions () =
   draw_text "Press P to play" 350 650 30 Color.raywhite
 
 let draw_player_1_setup p1_state () =
+  if p1_state.holes_on_board = 0 then clear_background Color.raywhite;
   create_grid 100 100;
   draw_text
     "Select 10 grid spaces to place your pigeon holes\n\
