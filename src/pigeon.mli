@@ -55,7 +55,7 @@ val init_grid :
   (coord * grid_square) list
 
 val make_grid :
-  ('a * 'b) list ->
+  'a list ->
   ('a * grid_square) list ->
   ('a * grid_square) list ->
   ('a * grid_square) list

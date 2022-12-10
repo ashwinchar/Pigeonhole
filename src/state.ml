@@ -20,7 +20,7 @@ let init_state =
   {
     bird_list = init_birds;
     grid = Pigeon.init_grid Pigeon.rows Pigeon.columns [];
-    holes_on_board = 10;
+    holes_on_board = 0;
     hit_list = [];
   }
 
@@ -67,3 +67,10 @@ let rec hit_hole bird grid row col res (s : state) =
       hit_hole bird grid row col
         (((row', col'), { occupied; shot_at }) :: res)
         s
+
+let rec can_shoot bird row col grid =
+  match grid with
+  | [] -> if bird.birds_left > 0 then true else false
+  | ((row', col'), { occupied; shot_at = true }) :: t
+    when row = row' && col = col' -> false
+  | ((row', col'), { occupied; shot_at }) :: t -> can_shoot bird row col t

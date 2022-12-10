@@ -1,9 +1,17 @@
 open Raylib
 open Pigeonholegame
+open State
+open Pigeon
 
 exception MalformedWindow of string
 exception NotInGrid
 exception NotBird
+
+type info_packet = {
+  bird_textures : Texture2D.t list;
+  p1_state : state;
+  p2_state : state;
+}
 
 let setup () =
   init_window 1000 900 "Pigeonhole";
@@ -33,9 +41,18 @@ let setup () =
   unload_image owl_img;
   unload_image pigeon_img;
 
-  [
-    pigeon_texture; card_texture; owl_texture; eagle_texture; kingfisher_texture;
-  ]
+  {
+    bird_textures =
+      [
+        pigeon_texture;
+        card_texture;
+        owl_texture;
+        eagle_texture;
+        kingfisher_texture;
+      ];
+    p1_state = init_state;
+    p2_state = init_state;
+  }
 
 type hl_box =
   | None
@@ -205,9 +222,9 @@ let draw_instructions () =
      with each species worth a different number of points. If a\n\
      hole is hit by a specific bird, the worth of that bird is added\n\
      to the player's score. There are 5 species of birds with the\n\
-     following values: Pigeon - 10, Cardinal - 50, Owl - 100, Eagle - 250,\n\
-     KingFisher - 500. Each player is given 50 Pigeons, 25\n\
-     Cardinals, 14 Owls, 8 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
+     following values: Pigeon - 10, Cardinal - 50, Owl - 100, Eagle\n\
+     - 250, KingFisher - 500. Each player is given 50 Pigeons,\n\
+     25 Cardinals, 14 Owls, 8 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
   draw_text "Press P to play" 350 650 30 Color.raywhite
 
 let draw_player_1_setup () =
@@ -237,7 +254,7 @@ let draw_player_2 bird_textures () =
 let draw_switch () = clear_background Color.raywhite
 
 (*Need to add commands for drawing birds and uncovered holes and whatnot*)
-let draw_window bird_textures id =
+let draw_window bird_textures id p1_state p2_state =
   window_in_bounds id;
   match id with
   | 0 -> draw_main_page ()
@@ -251,24 +268,30 @@ let draw_window bird_textures id =
 
 let pp_int_pair ppf (x, y) = Printf.fprintf ppf "(%c,%d)" x y
 
-let update id =
+let update id p1_state p2_state =
   match id with
   | 0 -> begin
       match get_key_pressed () with
       | P ->
           clear_background Color.raywhite;
-          window_id := 1
-      | I -> window_id := 6
-      | _ -> ()
+          window_id := 4;
+          (p1_state, p2_state)
+      | I ->
+          window_id := 6;
+          (p1_state, p2_state)
+      | _ -> (p1_state, p2_state)
     end
-  | 1 -> (
-      if is_mouse_button_down MouseButton.Left then
+  | 1 ->
+      if is_mouse_button_down MouseButton.Left then (
         match get_board_position () with
-        | x, y -> if click_on_birds x y then highlight_bird y ())
-  | 2 -> ()
-  | 3 -> ()
-  | 4 -> (
-      if is_mouse_button_down MouseButton.Left then
+        | x, y ->
+            if click_on_birds x y then highlight_bird y ();
+            (p1_state, p2_state))
+      else (p1_state, p2_state)
+  | 2 -> (p1_state, p2_state)
+  | 3 -> (p1_state, p2_state)
+  | 4 ->
+      if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
         | x, y ->
             if click_on_grid x y then (
@@ -276,25 +299,40 @@ let update id =
                 ("Click on: " ^ string_of_int x ^ " " ^ string_of_int y);
               print_endline "Grid Position: ";
               Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
-              draw_hole (get_grid_coordinate x y) ()))
-  | 5 -> ()
+              print_int p1_state.holes_on_board;
+              if p1_state.holes_on_board < 10 then (
+                draw_hole (get_grid_coordinate x y) ();
+                (set_hole (get_grid_coordinate x y) p1_state, p2_state))
+              else (p1_state, p2_state))
+            else (p1_state, p2_state)
+      else (p1_state, p2_state)
+  | 5 -> (p1_state, p2_state)
   | 6 -> begin
       match get_key_pressed () with
       | P ->
           clear_background Color.raywhite;
-          window_id := 1
-      | _ -> ()
+          window_id := 1;
+          (p1_state, p2_state)
+      | _ -> (p1_state, p2_state)
     end
   | _ -> raise (MalformedWindow "window out of range")
 
-let rec main_loop () bird_textures =
+let rec main_loop () packet =
   match window_should_close () with
   | true -> close_window ()
-  | false ->
+  | false -> (
       begin_drawing ();
-      draw_window bird_textures !window_id;
-      update !window_id;
+      draw_window packet.bird_textures !window_id packet.p1_state
+        packet.p2_state;
+      let new_state = update !window_id packet.p1_state packet.p2_state in
       end_drawing ();
-      main_loop () bird_textures
+      match new_state with
+      | s1, s2 ->
+          main_loop ()
+            {
+              bird_textures = packet.bird_textures;
+              p1_state = s1;
+              p2_state = s2;
+            })
 
 let () = setup () |> main_loop ()
