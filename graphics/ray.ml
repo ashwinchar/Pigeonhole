@@ -245,6 +245,15 @@ let get_bird_selection x y =
     | z -> NoBird
   else NoBird
 
+let get_bird_corner species =
+  match species with
+  | PigeonBird -> (820, 170)
+  | CardinalBird -> (820, 270)
+  | OwlBird -> (820, 370)
+  | EagleBird -> (820, 470)
+  | KingFisherBird -> (820, 570)
+  | NoBird -> raise NotBird
+
 let draw_hole coord () =
   match get_center coord with
   | x, y -> draw_circle x y 10. Color.black
@@ -266,6 +275,18 @@ let rec draw_grid grid () =
         50 50 Color.green;
       draw_grid t ()
   | (coord, { occupied; shot_at }) :: t -> draw_grid t ()
+
+let rec draw_birds_left bird_list () =
+  match bird_list with
+  | [] -> ()
+  | bird :: t ->
+      (match get_bird_corner bird.species with
+      | x, y ->
+          draw_rectangle x y 30 30 Color.lightgray;
+          draw_text
+            (string_of_int bird.birds_left)
+            (x + 5) (y + 5) 20 Color.black);
+      draw_birds_left t ()
 
 let draw_main_page () =
   clear_background Color.orange;
@@ -329,7 +350,8 @@ let draw_player_1 bird_textures p1_state p2_state () =
   draw_birds bird_textures 100 ();
   draw_text "Player 1" 10 10 30 Color.red;
   draw_score_board p1_state p2_state ();
-  draw_grid p1_state.grid ()
+  draw_grid p1_state.grid ();
+  draw_birds_left p1_state.bird_list ()
 
 let draw_player_2 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
@@ -337,7 +359,8 @@ let draw_player_2 bird_textures p1_state p2_state () =
   draw_birds bird_textures 100 ();
   draw_text "Player 2" 10 10 30 Color.blue;
   draw_score_board p1_state p2_state ();
-  draw_grid p2_state.grid ()
+  draw_grid p2_state.grid ();
+  draw_birds_left p2_state.bird_list ()
 
 let draw_switch () =
   clear_background Color.green;
