@@ -60,6 +60,8 @@ type hl_box =
 
 let window_id = ref 0
 let highlighted_box = ref None
+let buffer = ref false
+let double_buffer = ref false
 
 let rec draw_birds bird_textures y () =
   match bird_textures with
@@ -374,8 +376,24 @@ let draw_window bird_textures id p1_state p2_state =
   window_in_bounds id;
   match id with
   | 0 -> draw_main_page ()
-  | 1 -> draw_player_1 bird_textures p1_state p2_state ()
-  | 2 -> draw_player_2 bird_textures p1_state p2_state ()
+  | 1 ->
+      draw_player_1 bird_textures p1_state p2_state ();
+      if !double_buffer then (
+        wait_time 1000.;
+        window_id := 3;
+        double_buffer := false)
+      else if !buffer then (
+        double_buffer := true;
+        buffer := false)
+  | 2 ->
+      draw_player_2 bird_textures p1_state p2_state ();
+      if !double_buffer then (
+        wait_time 1000.;
+        window_id := 3;
+        double_buffer := false)
+      else if !buffer then (
+        double_buffer := true;
+        buffer := false)
   | 3 -> draw_switch ()
   | 4 -> draw_player_1_setup p1_state ()
   | 5 -> draw_player_2_setup p2_state ()
@@ -390,8 +408,6 @@ let update_set_holes x y player_state opponent_state next_window =
     print_endline "Grid Position: ";
     Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
     print_int player_state.holes_on_board;
-    print_endline (string_of_bool player_state.has_turn);
-    print_endline (string_of_bool opponent_state.has_turn);
     match BirdMapping.find (get_grid_coordinate x y) player_state.grid with
     | Some t ->
         if player_state.holes_on_board < 10 && t.occupied = false then (
@@ -424,8 +440,18 @@ let update id p1_state p2_state =
             highlight_bird y ();
             ({ p1_state with selected_bird = get_bird_selection x y }, p2_state)
         | x, y when click_on_grid x y ->
-            window_id := 3;
-            (p1_state, p2_state)
+            if
+              can_shoot
+                (get_bird_from_species p1_state.bird_list p1_state.selected_bird)
+                (get_grid_coordinate x y) p1_state.grid
+            then (
+              buffer := true;
+              ( shoot_grid
+                  (get_bird_from_species p1_state.bird_list
+                     p1_state.selected_bird)
+                  p1_state.grid (get_grid_coordinate x y) p1_state,
+                p2_state ))
+            else (p1_state, p2_state)
         | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
   | 2 ->
@@ -435,8 +461,18 @@ let update id p1_state p2_state =
             highlight_bird y ();
             (p1_state, { p2_state with selected_bird = get_bird_selection x y })
         | x, y when click_on_grid x y ->
-            window_id := 3;
-            (p1_state, p2_state)
+            if
+              can_shoot
+                (get_bird_from_species p2_state.bird_list p2_state.selected_bird)
+                (get_grid_coordinate x y) p2_state.grid
+            then (
+              buffer := true;
+              ( p1_state,
+                shoot_grid
+                  (get_bird_from_species p2_state.bird_list
+                     p2_state.selected_bird)
+                  p2_state.grid (get_grid_coordinate x y) p2_state ))
+            else (p1_state, p2_state)
         | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
   | 3 -> (
