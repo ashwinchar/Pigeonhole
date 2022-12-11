@@ -407,6 +407,7 @@ let update_set_holes x y player_state opponent_state next_window =
     print_endline ("Click on: " ^ string_of_int x ^ " " ^ string_of_int y);
     print_endline "Grid Position: ";
     Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
+    print_endline "";
     print_int player_state.holes_on_board;
     match BirdMapping.find (get_grid_coordinate x y) player_state.grid with
     | Some t ->
