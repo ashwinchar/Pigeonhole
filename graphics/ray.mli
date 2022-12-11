@@ -75,9 +75,9 @@ val update_set_holes :
   int ->
   int ->
   Pigeonholegame.State.state ->
-  'a ->
+  Pigeonholegame.State.state ->
   int ->
-  Pigeonholegame.State.state * 'a
+  Pigeonholegame.State.state * Pigeonholegame.State.state
 
 val update :
   int ->

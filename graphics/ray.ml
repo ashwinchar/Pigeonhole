@@ -311,22 +311,7 @@ let draw_instructions () =
      25 Cardinals, 14 Owls, 8 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
   draw_text "Press P to play" 350 650 30 Color.raywhite
 
-let draw_player_1_setup p1_state () =
-  if p1_state.holes_on_board = 0 then clear_background Color.raywhite;
-  create_grid 100 100;
-  draw_text
-    "Select 10 grid spaces to place your pigeon holes\n\
-     or choose the random selection button. \n\
-     After clicking on a grid space it cannot be changed\n\
-     so choose carefully." 100 700 30 Color.black;
-  draw_rectangle 675 300 250 100 Color.green;
-  draw_text "Randomize" 725 335 30 Color.black;
-  draw_text "Player 1" 675 100 60 Color.red;
-  if p1_state.holes_on_board = 10 then (
-    clear_background Color.raywhite;
-    window_id := 5)
-
-let draw_player_2_setup p2_state () =
+let draw_player_1_setup p2_state () =
   if p2_state.holes_on_board = 0 then clear_background Color.raywhite;
   create_grid 100 100;
   draw_text
@@ -336,8 +321,23 @@ let draw_player_2_setup p2_state () =
      so choose carefully." 100 700 30 Color.black;
   draw_rectangle 675 300 250 100 Color.green;
   draw_text "Randomize" 725 335 30 Color.black;
-  draw_text "Player 2" 675 100 60 Color.blue;
+  draw_text "Player 1" 675 100 60 Color.red;
   if p2_state.holes_on_board = 10 then (
+    clear_background Color.raywhite;
+    window_id := 5)
+
+let draw_player_2_setup p1_state () =
+  if p1_state.holes_on_board = 0 then clear_background Color.raywhite;
+  create_grid 100 100;
+  draw_text
+    "Select 10 grid spaces to place your pigeon holes\n\
+     or choose the random selection button. \n\
+     After clicking on a grid space it cannot be changed\n\
+     so choose carefully." 100 700 30 Color.black;
+  draw_rectangle 675 300 250 100 Color.green;
+  draw_text "Randomize" 725 335 30 Color.black;
+  draw_text "Player 2" 675 100 60 Color.blue;
+  if p1_state.holes_on_board = 10 then (
     clear_background Color.raywhite;
     window_id := 3)
 
@@ -395,8 +395,8 @@ let draw_window bird_textures id p1_state p2_state =
         double_buffer := true;
         buffer := false)
   | 3 -> draw_switch ()
-  | 4 -> draw_player_1_setup p1_state ()
-  | 5 -> draw_player_2_setup p2_state ()
+  | 4 -> draw_player_1_setup p2_state ()
+  | 5 -> draw_player_2_setup p1_state ()
   | 6 -> draw_instructions ()
   | _ -> raise (MalformedWindow "window out of range")
 
@@ -408,15 +408,15 @@ let update_set_holes x y player_state opponent_state next_window =
     print_endline "Grid Position: ";
     Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
     print_endline "";
-    print_int player_state.holes_on_board;
+    print_int opponent_state.holes_on_board;
     match BirdMapping.find (get_grid_coordinate x y) player_state.grid with
     | Some t ->
-        if player_state.holes_on_board < 10 && t.occupied = false then (
+        if opponent_state.holes_on_board < 10 && t.occupied = false then (
           draw_hole (get_grid_coordinate x y) ();
-          if player_state.holes_on_board = 9 then (
+          if opponent_state.holes_on_board = 9 then (
             window_id := next_window;
-            (set_hole (get_grid_coordinate x y) player_state, opponent_state))
-          else (set_hole (get_grid_coordinate x y) player_state, opponent_state))
+            (player_state, set_hole (get_grid_coordinate x y) opponent_state))
+          else (player_state, set_hole (get_grid_coordinate x y) opponent_state))
         else (player_state, opponent_state)
     | None -> (player_state, opponent_state))
   else (player_state, opponent_state)
