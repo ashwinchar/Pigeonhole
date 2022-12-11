@@ -290,6 +290,24 @@ let rec draw_birds_left bird_list () =
             (x + 5) (y + 5) 20 Color.black);
       draw_birds_left t ()
 
+let species_to_string spec =
+  match spec with
+  | PigeonBird -> "Pigeon"
+  | CardinalBird -> "Cardinal"
+  | OwlBird -> "Owl"
+  | EagleBird -> "Eagle"
+  | KingFisherBird -> "King Fisher"
+  | NoBird -> "None"
+
+let rec draw_bird_selection bird_spec bird_list () =
+  draw_text
+    ("Bird selected: \n"
+    ^ species_to_string bird_spec
+    ^ "\n"
+    ^ string_of_int (get_bird_from_species bird_list bird_spec).points
+    ^ " pts")
+    650 650 30 Color.black
+
 let draw_main_page () =
   clear_background Color.orange;
   draw_text "Pigeonhole" 220 300 100 Color.raywhite;
@@ -308,7 +326,7 @@ let draw_instructions () =
      to the player's score. There are 5 species of birds with the\n\
      following values: Pigeon - 10, Cardinal - 50, Owl - 100, Eagle\n\
      - 250, KingFisher - 500. Each player is given 50 Pigeons,\n\
-     25 Cardinals, 14 Owls, 8 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
+     25 Cardinals, 14 Owls, 7 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
   draw_text "Press P to play" 350 650 30 Color.raywhite
 
 let draw_player_1_setup p2_state () =
@@ -354,6 +372,7 @@ let draw_player_1 bird_textures p1_state p2_state () =
   draw_text "Player 1" 10 10 30 Color.red;
   draw_score_board p1_state p2_state ();
   draw_grid p1_state.grid ();
+  draw_bird_selection p1_state.selected_bird p1_state.bird_list ();
   draw_birds_left p1_state.bird_list ()
 
 let draw_player_2 bird_textures p1_state p2_state () =
@@ -363,6 +382,7 @@ let draw_player_2 bird_textures p1_state p2_state () =
   draw_text "Player 2" 10 10 30 Color.blue;
   draw_score_board p1_state p2_state ();
   draw_grid p2_state.grid ();
+  draw_bird_selection p2_state.selected_bird p2_state.bird_list ();
   draw_birds_left p2_state.bird_list ()
 
 let draw_switch () =

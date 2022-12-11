@@ -17,6 +17,7 @@ type grid_square = {
   occupied : bool;
   shot_at : bool;
 }
+(**Type to identify if a given grid space contains a hole or has been shot at*)
 
 type coord = char * int
 (** Type to identify tiles on the game board *)

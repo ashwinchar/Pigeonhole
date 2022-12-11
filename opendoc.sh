@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS
   open _build/default/_doc/_html/PigeonholeGame/PigeonholeGame/

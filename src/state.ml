@@ -20,7 +20,7 @@ type state = {
 let init_pigeons = { species = PigeonBird; points = 10; birds_left = 50 }
 let init_cards = { species = CardinalBird; points = 50; birds_left = 25 }
 let init_owls = { species = OwlBird; points = 100; birds_left = 14 }
-let init_eagles = { species = EagleBird; points = 250; birds_left = 8 }
+let init_eagles = { species = EagleBird; points = 250; birds_left = 7 }
 let init_kingfisher = { species = KingFisherBird; points = 500; birds_left = 4 }
 
 let init_birds =

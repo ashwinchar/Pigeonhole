@@ -5,6 +5,7 @@ type bird_species =
   | EagleBird
   | KingFisherBird
   | NoBird
+(***)
 
 type bird = {
   species : bird_species;
