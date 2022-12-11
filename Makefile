@@ -13,3 +13,9 @@ clean:
 zip:
 	rm -f Pigeonhole.zip
 	zip -r Pigeonhole.zip .
+
+doc:
+	dune build @doc
+
+opendoc: doc
+	@bash opendoc.sh
