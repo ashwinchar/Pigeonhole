@@ -50,8 +50,8 @@ let setup () =
         eagle_texture;
         kingfisher_texture;
       ];
-    p1_state = { init_state with has_turn = false };
-    p2_state = init_state;
+    p1_state = init_state;
+    p2_state = { init_state with has_turn = false };
   }
 
 type hl_box =
@@ -60,6 +60,8 @@ type hl_box =
 
 let window_id = ref 0
 let highlighted_box = ref None
+let buffer = ref false
+let double_buffer = ref false
 
 let rec draw_birds bird_textures y () =
   match bird_textures with
@@ -202,9 +204,91 @@ let get_center coord =
   match coord with
   | x', y' -> (x_center x', y_center y')
 
+let get_corner coord =
+  let x_corner x =
+    match x with
+    | z when z = 'A' -> 100
+    | z when z = 'B' -> 150
+    | z when z = 'C' -> 200
+    | z when z = 'D' -> 250
+    | z when z = 'E' -> 300
+    | z when z = 'F' -> 350
+    | z when z = 'G' -> 400
+    | z when z = 'H' -> 450
+    | z when z = 'I' -> 500
+    | z when z = 'J' -> 550
+    | _ -> raise NotInGrid
+  in
+  let y_corner y =
+    match y with
+    | z when z = 0 -> 100
+    | z when z = 1 -> 150
+    | z when z = 2 -> 200
+    | z when z = 3 -> 250
+    | z when z = 4 -> 300
+    | z when z = 5 -> 350
+    | z when z = 6 -> 400
+    | z when z = 7 -> 450
+    | z when z = 8 -> 500
+    | z when z = 9 -> 550
+    | _ -> raise NotInGrid
+  in
+  match coord with
+  | x', y' -> (x_corner x', y_corner y')
+
+let get_bird_selection x y =
+  if click_on_birds x y then
+    match y with
+    | z when z >= 100 && z < 200 -> PigeonBird
+    | z when z >= 200 && z < 300 -> CardinalBird
+    | z when z >= 300 && z < 400 -> OwlBird
+    | z when z >= 400 && z < 500 -> EagleBird
+    | z when z >= 500 && z < 600 -> KingFisherBird
+    | z -> NoBird
+  else NoBird
+
+let get_bird_corner species =
+  match species with
+  | PigeonBird -> (820, 170)
+  | CardinalBird -> (820, 270)
+  | OwlBird -> (820, 370)
+  | EagleBird -> (820, 470)
+  | KingFisherBird -> (820, 570)
+  | NoBird -> raise NotBird
+
 let draw_hole coord () =
   match get_center coord with
   | x, y -> draw_circle x y 10. Color.black
+
+let rec draw_grid grid () =
+  match grid with
+  | [] -> ()
+  | (coord, { occupied = true; shot_at = true }) :: t ->
+      draw_rectangle
+        (fst (get_corner coord))
+        (snd (get_corner coord))
+        50 50 Color.green;
+      draw_hole coord ();
+      draw_grid t ()
+  | (coord, { occupied = false; shot_at = true }) :: t ->
+      draw_rectangle
+        (fst (get_corner coord))
+        (snd (get_corner coord))
+        50 50 Color.green;
+      draw_grid t ()
+  | (coord, { occupied; shot_at }) :: t -> draw_grid t ()
+
+let rec draw_birds_left bird_list () =
+  match bird_list with
+  | [] -> ()
+  | bird :: t ->
+      (match get_bird_corner bird.species with
+      | x, y ->
+          draw_rectangle x y 30 30 Color.lightgray;
+          draw_text
+            (string_of_int bird.birds_left)
+            (x + 5) (y + 5) 20 Color.black);
+      draw_birds_left t ()
 
 let draw_main_page () =
   clear_background Color.orange;
@@ -227,7 +311,8 @@ let draw_instructions () =
      25 Cardinals, 14 Owls, 8 Eagles, and 4 KingFishers" 50 50 30 Color.raywhite;
   draw_text "Press P to play" 350 650 30 Color.raywhite
 
-let draw_player_1_setup () =
+let draw_player_1_setup p2_state () =
+  if p2_state.holes_on_board = 0 then clear_background Color.raywhite;
   create_grid 100 100;
   draw_text
     "Select 10 grid spaces to place your pigeon holes\n\
@@ -236,9 +321,13 @@ let draw_player_1_setup () =
      so choose carefully." 100 700 30 Color.black;
   draw_rectangle 675 300 250 100 Color.green;
   draw_text "Randomize" 725 335 30 Color.black;
-  draw_text "Player 1" 675 100 60 Color.red
+  draw_text "Player 1" 675 100 60 Color.red;
+  if p2_state.holes_on_board = 10 then (
+    clear_background Color.raywhite;
+    window_id := 5)
 
-let draw_player_2_setup () =
+let draw_player_2_setup p1_state () =
+  if p1_state.holes_on_board = 0 then clear_background Color.raywhite;
   create_grid 100 100;
   draw_text
     "Select 10 grid spaces to place your pigeon holes\n\
@@ -247,7 +336,10 @@ let draw_player_2_setup () =
      so choose carefully." 100 700 30 Color.black;
   draw_rectangle 675 300 250 100 Color.green;
   draw_text "Randomize" 725 335 30 Color.black;
-  draw_text "Player 2" 675 100 60 Color.blue
+  draw_text "Player 2" 675 100 60 Color.blue;
+  if p1_state.holes_on_board = 10 then (
+    clear_background Color.raywhite;
+    window_id := 3)
 
 let draw_score_board p1_state p2_state () =
   draw_rectangle 100 650 500 200 Color.lightgray;
@@ -260,14 +352,18 @@ let draw_player_1 bird_textures p1_state p2_state () =
   create_grid 100 100;
   draw_birds bird_textures 100 ();
   draw_text "Player 1" 10 10 30 Color.red;
-  draw_score_board p1_state p2_state ()
+  draw_score_board p1_state p2_state ();
+  draw_grid p1_state.grid ();
+  draw_birds_left p1_state.bird_list ()
 
 let draw_player_2 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
   create_grid 100 100;
   draw_birds bird_textures 100 ();
   draw_text "Player 2" 10 10 30 Color.blue;
-  draw_score_board p1_state p2_state ()
+  draw_score_board p1_state p2_state ();
+  draw_grid p2_state.grid ();
+  draw_birds_left p2_state.bird_list ()
 
 let draw_switch () =
   clear_background Color.green;
@@ -280,11 +376,27 @@ let draw_window bird_textures id p1_state p2_state =
   window_in_bounds id;
   match id with
   | 0 -> draw_main_page ()
-  | 1 -> draw_player_1 bird_textures p1_state p2_state ()
-  | 2 -> draw_player_2 bird_textures p1_state p2_state ()
+  | 1 ->
+      draw_player_1 bird_textures p1_state p2_state ();
+      if !double_buffer then (
+        wait_time 1000.;
+        window_id := 3;
+        double_buffer := false)
+      else if !buffer then (
+        double_buffer := true;
+        buffer := false)
+  | 2 ->
+      draw_player_2 bird_textures p1_state p2_state ();
+      if !double_buffer then (
+        wait_time 1000.;
+        window_id := 3;
+        double_buffer := false)
+      else if !buffer then (
+        double_buffer := true;
+        buffer := false)
   | 3 -> draw_switch ()
-  | 4 -> draw_player_1_setup ()
-  | 5 -> draw_player_2_setup ()
+  | 4 -> draw_player_1_setup p2_state ()
+  | 5 -> draw_player_2_setup p1_state ()
   | 6 -> draw_instructions ()
   | _ -> raise (MalformedWindow "window out of range")
 
@@ -295,15 +407,18 @@ let update_set_holes x y player_state opponent_state next_window =
     print_endline ("Click on: " ^ string_of_int x ^ " " ^ string_of_int y);
     print_endline "Grid Position: ";
     Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
-    print_int player_state.holes_on_board;
-    if player_state.holes_on_board < 10 then (
-      draw_hole (get_grid_coordinate x y) ();
-      if player_state.holes_on_board = 9 then (
-        window_id := next_window;
-        clear_background Color.raywhite;
-        (set_hole (get_grid_coordinate x y) player_state, opponent_state))
-      else (set_hole (get_grid_coordinate x y) player_state, opponent_state))
-    else (player_state, opponent_state))
+    print_endline "";
+    print_int opponent_state.holes_on_board;
+    match BirdMapping.find (get_grid_coordinate x y) player_state.grid with
+    | Some t ->
+        if opponent_state.holes_on_board < 10 && t.occupied = false then (
+          draw_hole (get_grid_coordinate x y) ();
+          if opponent_state.holes_on_board = 9 then (
+            window_id := next_window;
+            (player_state, set_hole (get_grid_coordinate x y) opponent_state))
+          else (player_state, set_hole (get_grid_coordinate x y) opponent_state))
+        else (player_state, opponent_state)
+    | None -> (player_state, opponent_state))
   else (player_state, opponent_state)
 
 let update id p1_state p2_state =
@@ -315,60 +430,91 @@ let update id p1_state p2_state =
           window_id := 4;
           (p1_state, p2_state)
       | I ->
-          window_id := 3;
+          window_id := 6;
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
     end
   | 1 ->
-      if is_mouse_button_down MouseButton.Left then
+      if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
         | x, y when click_on_birds x y ->
             highlight_bird y ();
-            (p1_state, p2_state)
+            ({ p1_state with selected_bird = get_bird_selection x y }, p2_state)
         | x, y when click_on_grid x y ->
-            window_id := 3;
-            (p1_state, p2_state)
+            if
+              can_shoot
+                (get_bird_from_species p1_state.bird_list p1_state.selected_bird)
+                (get_grid_coordinate x y) p1_state.grid
+            then (
+              buffer := true;
+              ( shoot_grid
+                  (get_bird_from_species p1_state.bird_list
+                     p1_state.selected_bird)
+                  p1_state.grid (get_grid_coordinate x y) p1_state,
+                p2_state ))
+            else (p1_state, p2_state)
         | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
   | 2 ->
-      if is_mouse_button_down MouseButton.Left then
+      if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
         | x, y when click_on_birds x y ->
             highlight_bird y ();
-            (p1_state, p2_state)
+            (p1_state, { p2_state with selected_bird = get_bird_selection x y })
         | x, y when click_on_grid x y ->
-            window_id := 3;
-            (p1_state, p2_state)
+            if
+              can_shoot
+                (get_bird_from_species p2_state.bird_list p2_state.selected_bird)
+                (get_grid_coordinate x y) p2_state.grid
+            then (
+              buffer := true;
+              ( p1_state,
+                shoot_grid
+                  (get_bird_from_species p2_state.bird_list
+                     p2_state.selected_bird)
+                  p2_state.grid (get_grid_coordinate x y) p2_state ))
+            else (p1_state, p2_state)
         | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
   | 3 -> (
       match get_key_pressed () with
-      | Enter ->
-          begin
-            match p1_state.has_turn with
-            | true -> window_id := 2
-            | false -> window_id := 1
-          end;
-          clear_background Color.raywhite;
-          switch_turn p1_state p2_state
+      | Enter -> (
+          match p1_state.mode with
+          | Setup -> begin
+              match p1_state.has_turn with
+              | true ->
+                  window_id := 5;
+                  switch_turn p1_state p2_state
+              | false ->
+                  window_id := 1;
+                  switch_mode p1_state p2_state
+            end
+          | Gameplay ->
+              begin
+                match p1_state.has_turn with
+                | true -> window_id := 2
+                | false -> window_id := 1
+              end;
+              clear_background Color.raywhite;
+              switch_turn p1_state p2_state)
       | _ -> (p1_state, p2_state))
   | 4 ->
       if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
-        | x, y -> update_set_holes x y p1_state p2_state 5
+        | x, y -> update_set_holes x y p1_state p2_state 3
       else (p1_state, p2_state)
   | 5 ->
       if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
         | x, y ->
-            ( snd (update_set_holes x y p1_state p2_state 3),
-              fst (update_set_holes x y p1_state p2_state 3) )
+            ( snd (update_set_holes x y p2_state p1_state 3),
+              fst (update_set_holes x y p2_state p1_state 3) )
       else (p1_state, p2_state)
   | 6 -> begin
       match get_key_pressed () with
       | P ->
           clear_background Color.raywhite;
-          window_id := 1;
+          window_id := 4;
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
     end
