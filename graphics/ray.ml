@@ -139,6 +139,9 @@ let click_on_grid x y =
 let click_on_birds x y =
   if x >= 750 && x <= 850 && y >= 100 && y <= 600 then true else false
 
+let click_on_random x y =
+  if x >= 675 && x <= 925 && y >= 300 && y <= 400 then true else false
+
 let get_board_position () = (get_mouse_x (), get_mouse_y ())
 
 let get_grid_coordinate x y =

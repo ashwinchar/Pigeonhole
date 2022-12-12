@@ -45,6 +45,7 @@ module BirdMapping : sig
   val is_empty : 'a list -> bool
   val empty : 'a list
   val mem : 'a -> ('a * 'b) list -> bool
+  val to_list : 'a list -> 'a list
 end
 
 val pair :

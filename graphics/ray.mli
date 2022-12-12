@@ -25,6 +25,7 @@ val horizontal_lines : int -> int -> int -> int -> unit
 val vertical_lines : int -> int -> int -> int -> unit
 val create_grid : int -> int -> unit
 val click_on_grid : int -> int -> bool
+val click_on_random : int -> int -> bool
 val click_on_birds : int -> int -> bool
 val get_board_position : unit -> int * int
 val get_grid_coordinate : int -> int -> char * int
