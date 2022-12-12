@@ -5,26 +5,36 @@ type bird_species =
   | EagleBird
   | KingFisherBird
   | NoBird
-(***)
+
+(** The type of bird that the player can "shoot" into a hole *)
 
 type bird = {
   species : bird_species;
   points : int;
   birds_left : int;
 }
+(** The type of bird that contains the following fields: species, size, hits *)
 
 type grid_square = {
   occupied : bool;
   shot_at : bool;
 }
+(** Type to identify if a given grid space contains a hole or has been shot at*)
 
 type coord = char * int
+(** Type to identify tiles on the game board *)
 
 val rows : int list
+(** List of possible row numbers for grid *)
+
 val columns : char list
+(** List of possible column letters for grid *)
 
 exception HoleHere
+(** Raised when a hole is already placed at given coordinates. *)
+
 exception Malformed
+(** Raised when there is an invalid command. *)
 
 module BirdMapping : sig
   type t = (coord * grid_square) list

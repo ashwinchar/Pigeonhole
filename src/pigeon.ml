@@ -4,42 +4,34 @@ type bird_species =
   | OwlBird
   | EagleBird
   | KingFisherBird
-  | NoBird  (** The type of bird that the player can "shoot" into a hole *)
+  | NoBird
 
 type bird = {
   species : bird_species;
   points : int;
   birds_left : int;
 }
-(** The type of bird that contains the following fields: species, size, hits *)
 
 type grid_square = {
   occupied : bool;
   shot_at : bool;
 }
-(**Type to identify if a given grid space contains a hole or has been shot at*)
 
 type coord = char * int
-(** Type to identify tiles on the game board *)
 
 let rows = [ 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 ]
 let columns = [ 'A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H'; 'I'; 'J' ]
 
 exception HoleHere
-(** Raised when a hole is already placed at given coordinates. *)
-
 exception Malformed
-(** Raised when there is an invalid command. *)
 
 module BirdMapping = struct
   type t = (coord * grid_square) list
-  (** 
-  Abstraction Function : [[(k1,v1); (k2, v2); (k3, v3); ... ; (kn, vn)]] is 
-  an association list that represents the map 
-  {k1 : v1, k2 : v2, k3 :v3, ... , kn : vn}. If a key is inserted but already
-  bounded to the map we will remove the key and replace it with a new binding. 
-  The empty map is just {}
-  Representataion Invariant: The map contains no dups. 
+  (** AF: [[(k1,v1); (k2, v2); (k3, v3); ... ; (kn, vn)]] is an association list
+  that represents the map {k1 : v1, k2 : v2, k3 :v3, ... , kn : vn}. If a key 
+  is inserted but already bounded to the map we will remove the key and 
+  replace it with a new binding. The empty map is just {}.
+  RI: The map contains no dups. 
   *)
 
   let find k m = List.assoc_opt k m
@@ -85,7 +77,6 @@ let rec make_grid hole_coords grid out =
   | (coord, { occupied = true; shot_at }) :: t ->
       make_grid hole_coords t
         (BirdMapping.insert coord { occupied = true; shot_at } out)
-  | _ -> raise Malformed
 
 let rec get_col_list (row : int list) (col : char) (row1 : int) (row2 : int) out
     =
