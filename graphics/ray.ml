@@ -59,45 +59,38 @@ type hl_box =
   | Some of int
 
 let window_id = ref 0
-let highlighted_box = ref None
 let buffer = ref false
 let double_buffer = ref false
 
-let rec draw_birds bird_textures y () =
+let rec draw_birds bird_textures y state () =
   match bird_textures with
   | [] -> ()
   | h :: t ->
-      (draw_texture h 750 y Color.raywhite;
-       draw_line 750 y 850 y Color.black;
-       draw_line 750 (y + 100) 850 (y + 100) Color.black;
-       draw_line 750 y 750 (y + 100) Color.black;
-       draw_line 850 y 850 (y + 100) Color.black;
-       match !highlighted_box with
-       | None -> ()
-       | Some x -> highlight_bird x ());
-      draw_birds t (y + 100) ()
+      draw_texture h 750 y Color.raywhite;
+      draw_line 750 y 850 y Color.black;
+      draw_line 750 (y + 100) 850 (y + 100) Color.black;
+      draw_line 750 y 750 (y + 100) Color.black;
+      draw_line 850 y 850 (y + 100) Color.black;
+      highlight_bird state.selected_bird ();
+      draw_birds t (y + 100) state ()
 
-and highlight_bird y () =
+and highlight_bird (bird : Pigeonholegame.Pigeon.bird_species) () =
   let get_y_coord =
-    match y with
-    | z when z >= 100 && z < 200 ->
-        highlighted_box := Some 100;
+    match bird with
+    | PigeonBird ->
         100
-    | z when z >= 200 && z < 300 ->
-        highlighted_box := Some 200;
+    | CardinalBird ->
         200
-    | z when z >= 300 && z < 400 ->
-        highlighted_box := Some 300;
+    | OwlBird ->
         300
-    | z when z >= 400 && z < 500 ->
-        highlighted_box := Some 400;
+    | EagleBird ->
         400
-    | z when z >= 500 && z < 600 ->
-        highlighted_box := Some 500;
+    | KingFisherBird ->
         500
-    | _ -> raise NotBird
+    | _ -> 0
   in
-  draw_line_ex
+  if get_y_coord = 0 then () else
+  (draw_line_ex
     (Vector2.create 750.0 (float_of_int get_y_coord))
     (Vector2.create 850.0 (float_of_int get_y_coord))
     10.0 Color.orange;
@@ -112,7 +105,7 @@ and highlight_bird y () =
   draw_line_ex
     (Vector2.create 850.0 (float_of_int get_y_coord))
     (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
-    10.0 Color.orange
+    10.0 Color.orange)
 
 let window_in_bounds win =
   if win < 0 && win > 11 then raise (MalformedWindow "window id out of range")
@@ -371,7 +364,7 @@ let draw_score_board p1_state p2_state () =
 let draw_player_1 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
   create_grid 100 100;
-  draw_birds bird_textures 100 ();
+  draw_birds bird_textures 100 p1_state ();
   draw_text "Player 1" 10 10 30 Color.red;
   draw_score_board p1_state p2_state ();
   draw_grid p1_state.grid ();
@@ -381,7 +374,7 @@ let draw_player_1 bird_textures p1_state p2_state () =
 let draw_player_2 bird_textures p1_state p2_state () =
   clear_background Color.raywhite;
   create_grid 100 100;
-  draw_birds bird_textures 100 ();
+  draw_birds bird_textures 100 p2_state ();
   draw_text "Player 2" 10 10 30 Color.blue;
   draw_score_board p1_state p2_state ();
   draw_grid p2_state.grid ();
@@ -467,7 +460,7 @@ let update_set_holes x y player_state opponent_state next_window =
     Printf.printf "%a\n" pp_int_pair (get_grid_coordinate x y);
     print_endline "";
     print_int opponent_state.holes_on_board;
-    match BirdMapping.find (get_grid_coordinate x y) player_state.grid with
+    match BirdMapping.find (get_grid_coordinate x y) opponent_state.grid with
     | Some t ->
         if opponent_state.holes_on_board < 10 && t.occupied = false then (
           draw_hole (get_grid_coordinate x y) ();
@@ -497,7 +490,7 @@ let update id p1_state p2_state =
         if is_mouse_button_pressed MouseButton.Left then
           match get_board_position () with
           | x, y when click_on_birds x y ->
-              highlight_bird y ();
+              highlight_bird p1_state.selected_bird ();
               ( { p1_state with selected_bird = get_bird_selection x y },
                 p2_state )
           | x, y when click_on_grid x y ->
@@ -533,7 +526,7 @@ let update id p1_state p2_state =
         if is_mouse_button_pressed MouseButton.Left then
           match get_board_position () with
           | x, y when click_on_birds x y ->
-              highlight_bird y ();
+              highlight_bird p2_state.selected_bird ();
               ( p1_state,
                 { p2_state with selected_bird = get_bird_selection x y } )
           | x, y when click_on_grid x y ->

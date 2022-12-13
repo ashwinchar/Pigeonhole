@@ -15,18 +15,20 @@ type hl_box =
   | Some of int
 
 val window_id : int ref
-val highlighted_box : hl_box ref
 val buffer : bool ref
 val double_buffer : bool ref
-val draw_birds : Raylib.Texture.t list -> int -> unit -> unit
-val highlight_bird : int -> unit -> unit
+
+val draw_birds :
+  Raylib.Texture.t list -> int -> Pigeonholegame.State.state -> unit -> unit
+
+val highlight_bird : Pigeonholegame.Pigeon.bird_species -> unit -> unit
 val window_in_bounds : int -> unit
 val horizontal_lines : int -> int -> int -> int -> unit
 val vertical_lines : int -> int -> int -> int -> unit
 val create_grid : int -> int -> unit
 val click_on_grid : int -> int -> bool
-val click_on_random : int -> int -> bool
 val click_on_birds : int -> int -> bool
+val click_on_random : int -> int -> bool
 val get_board_position : unit -> int * int
 val get_grid_coordinate : int -> int -> char * int
 val get_center : char * int -> int * int
@@ -39,6 +41,14 @@ val draw_grid :
   ((char * int) * Pigeonholegame.Pigeon.grid_square) list -> unit -> unit
 
 val draw_birds_left : Pigeonholegame.Pigeon.bird list -> unit -> unit
+val species_to_string : Pigeonholegame.Pigeon.bird_species -> string
+
+val draw_bird_selection :
+  Pigeonholegame.Pigeon.bird_species ->
+  Pigeonholegame.Pigeon.bird list ->
+  unit ->
+  unit
+
 val draw_main_page : unit -> unit
 val draw_instructions : unit -> unit
 val draw_player_1_setup : Pigeonholegame.State.state -> unit -> unit
@@ -62,6 +72,10 @@ val draw_player_2 :
   unit
 
 val draw_switch : unit -> unit
+val draw_winner_p1 : unit -> unit
+val draw_winner_p2 : unit -> unit
+val draw_tie : unit -> unit
+val draw_play_again : unit -> unit
 
 val draw_window :
   Raylib.Texture.t list ->
@@ -75,10 +89,10 @@ val pp_int_pair : out_channel -> char * int -> unit
 val update_set_holes :
   int ->
   int ->
-  Pigeonholegame.State.state ->
+  'a ->
   Pigeonholegame.State.state ->
   int ->
-  Pigeonholegame.State.state * Pigeonholegame.State.state
+  'a * Pigeonholegame.State.state
 
 val update :
   int ->
