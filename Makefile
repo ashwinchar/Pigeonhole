@@ -4,7 +4,7 @@ build:
 	dune build
 
 test:
-	OCAMLRUNPARAM=b dune exec test/main.exe
+	OCAMLRUNPARAM=b dune exec test/test.exe
 
 play:
 	OCAMLRUNPARAM=b dune exec graphics/ray.exe

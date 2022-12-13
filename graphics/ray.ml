@@ -77,35 +77,31 @@ let rec draw_birds bird_textures y state () =
 and highlight_bird (bird : Pigeonholegame.Pigeon.bird_species) () =
   let get_y_coord =
     match bird with
-    | PigeonBird ->
-        100
-    | CardinalBird ->
-        200
-    | OwlBird ->
-        300
-    | EagleBird ->
-        400
-    | KingFisherBird ->
-        500
+    | PigeonBird -> 100
+    | CardinalBird -> 200
+    | OwlBird -> 300
+    | EagleBird -> 400
+    | KingFisherBird -> 500
     | _ -> 0
   in
-  if get_y_coord = 0 then () else
-  (draw_line_ex
-    (Vector2.create 750.0 (float_of_int get_y_coord))
-    (Vector2.create 850.0 (float_of_int get_y_coord))
-    10.0 Color.orange;
-  draw_line_ex
-    (Vector2.create 750.0 (float_of_int (get_y_coord + 100)))
-    (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
-    10.0 Color.orange;
-  draw_line_ex
-    (Vector2.create 750.0 (float_of_int get_y_coord))
-    (Vector2.create 750.0 (float_of_int (get_y_coord + 100)))
-    10.0 Color.orange;
-  draw_line_ex
-    (Vector2.create 850.0 (float_of_int get_y_coord))
-    (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
-    10.0 Color.orange)
+  if get_y_coord = 0 then ()
+  else (
+    draw_line_ex
+      (Vector2.create 750.0 (float_of_int get_y_coord))
+      (Vector2.create 850.0 (float_of_int get_y_coord))
+      10.0 Color.orange;
+    draw_line_ex
+      (Vector2.create 750.0 (float_of_int (get_y_coord + 100)))
+      (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
+      10.0 Color.orange;
+    draw_line_ex
+      (Vector2.create 750.0 (float_of_int get_y_coord))
+      (Vector2.create 750.0 (float_of_int (get_y_coord + 100)))
+      10.0 Color.orange;
+    draw_line_ex
+      (Vector2.create 850.0 (float_of_int get_y_coord))
+      (Vector2.create 850.0 (float_of_int (get_y_coord + 100)))
+      10.0 Color.orange)
 
 let window_in_bounds win =
   if win < 0 && win > 11 then raise (MalformedWindow "window id out of range")
@@ -442,7 +438,7 @@ let draw_window bird_textures id p1_state p2_state =
   | 9 -> draw_tie ()
   | 10 ->
       if !double_buffer then (
-        wait_time 2000.;
+        wait_time 3500.;
         window_id := 10;
         double_buffer := false)
       else if !buffer then (
