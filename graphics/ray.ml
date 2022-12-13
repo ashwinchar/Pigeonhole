@@ -362,6 +362,10 @@ let draw_player_1 bird_textures p1_state p2_state () =
   create_grid 100 100;
   draw_birds bird_textures 100 p1_state ();
   draw_text "Player 1" 10 10 30 Color.red;
+  draw_text
+    ("Holes left to hit: "
+    ^ string_of_int (10 - num_holes_hit p1_state.hit_list))
+    300 10 40 Color.black;
   draw_score_board p1_state p2_state ();
   draw_grid p1_state.grid ();
   draw_bird_selection p1_state.selected_bird p1_state.bird_list ();
@@ -372,6 +376,10 @@ let draw_player_2 bird_textures p1_state p2_state () =
   create_grid 100 100;
   draw_birds bird_textures 100 p2_state ();
   draw_text "Player 2" 10 10 30 Color.blue;
+  draw_text
+    ("Holes left to hit: "
+    ^ string_of_int (10 - num_holes_hit p2_state.hit_list))
+    300 10 40 Color.black;
   draw_score_board p1_state p2_state ();
   draw_grid p2_state.grid ();
   draw_bird_selection p2_state.selected_bird p2_state.bird_list ();
@@ -438,7 +446,7 @@ let draw_window bird_textures id p1_state p2_state =
   | 9 -> draw_tie ()
   | 10 ->
       if !double_buffer then (
-        wait_time 3500.;
+        wait_time 3250.;
         window_id := 10;
         double_buffer := false)
       else if !buffer then (
