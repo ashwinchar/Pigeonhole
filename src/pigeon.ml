@@ -49,7 +49,7 @@ module BirdMapping = struct
     match m with
     | [] -> false
     | (k', _) :: t -> if k' = k then true else mem k t
-  
+
   let to_list (d : 'a list) = d
 end
 

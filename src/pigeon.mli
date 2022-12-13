@@ -37,6 +37,7 @@ exception HoleHere
 exception Malformed
 (** Raises: [Malformed] when there is an invalid command. *)
 
+(** A [BirdMapping] contains the states of tiles on the grid. *)
 module BirdMapping : sig
   type t = (coord * grid_square) list
 
