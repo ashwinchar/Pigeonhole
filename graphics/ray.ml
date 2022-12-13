@@ -363,7 +363,7 @@ let draw_player_1 bird_textures p1_state p2_state () =
   draw_birds bird_textures 100 p1_state ();
   draw_text "Player 1" 10 10 30 Color.red;
   draw_text
-    ("Holes left to hit: "
+    ("Holes Left to Hit: "
     ^ string_of_int (10 - num_holes_hit p1_state.hit_list))
     300 10 40 Color.black;
   draw_score_board p1_state p2_state ();
@@ -377,7 +377,7 @@ let draw_player_2 bird_textures p1_state p2_state () =
   draw_birds bird_textures 100 p2_state ();
   draw_text "Player 2" 10 10 30 Color.blue;
   draw_text
-    ("Holes left to hit: "
+    ("Holes Left to Hit: "
     ^ string_of_int (10 - num_holes_hit p2_state.hit_list))
     300 10 40 Color.black;
   draw_score_board p1_state p2_state ();
