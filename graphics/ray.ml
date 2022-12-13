@@ -414,7 +414,8 @@ let draw_tie () =
 
 let draw_play_again () =
   clear_background Color.green;
-  draw_text "Want to play again? Press P" 100 350 40 Color.white
+  draw_text "Want to play again?" 250 325 50 Color.white;
+  draw_text "Press P" 395 425 50 Color.white
 
 (*Need to add commands for drawing birds and uncovered holes and whatnot*)
 let draw_window bird_textures id p1_state p2_state =
@@ -446,7 +447,15 @@ let draw_window bird_textures id p1_state p2_state =
   | 7 -> draw_winner_p1 ()
   | 8 -> draw_winner_p2 ()
   | 9 -> draw_tie ()
-  | 10 -> draw_play_again ()
+  | 10 ->
+      if !double_buffer then (
+        wait_time 2000.;
+        window_id := 10;
+        double_buffer := false)
+      else if !buffer then (
+        double_buffer := true;
+        buffer := false);
+      draw_play_again ()
   | _ -> raise (MalformedWindow "window out of range")
 
 let pp_int_pair ppf (x, y) = Printf.fprintf ppf "(%c,%d)" x y
@@ -597,14 +606,23 @@ let update id p1_state p2_state =
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
     end
-  | 7 -> (p1_state, p2_state)
-  | 8 -> (p1_state, p2_state)
-  | 9 -> (p1_state, p2_state)
+  | 7 ->
+      buffer := true;
+      window_id := 10;
+      (p1_state, p2_state)
+  | 8 ->
+      buffer := true;
+      window_id := 10;
+      (p1_state, p2_state)
+  | 9 ->
+      buffer := true;
+      window_id := 10;
+      (p1_state, p2_state)
   | 10 -> begin
       match get_key_pressed () with
       | P ->
           window_id := 0;
-          (init_state, init_state)
+          (init_state, { init_state with has_turn = false })
       | _ -> (init_state, init_state)
     end
   | _ -> raise (MalformedWindow "window out of range")
