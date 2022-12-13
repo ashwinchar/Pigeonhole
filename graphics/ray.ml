@@ -115,7 +115,7 @@ and highlight_bird y () =
     10.0 Color.orange
 
 let window_in_bounds win =
-  if win < 0 && win > 6 then raise (MalformedWindow "window id out of range")
+  if win < 0 && win > 11 then raise (MalformedWindow "window id out of range")
 
 let rec horizontal_lines (count : int) (x : int) (x' : int) (y : int) =
   if count = 0 then ()
@@ -394,23 +394,27 @@ let draw_switch () =
   draw_text "to opponent" 325 420 60 Color.white;
   draw_text "Press enter to continue" 270 700 40 Color.white
 
-let draw_winner_p1 () (victory_message : string) =
-  clear_background Color.green;
-  draw_text victory_message 300 350 60 Color.white;
-  wait_time 3000.;
-  clear_background Color.red;
-  draw_text "you lose P2 take the L" 300 350 60 Color.white
+let draw_winner_p1 () =
+  clear_background Color.white;
+  draw_rectangle 0 0 500 1000 Color.green;
+  draw_text "Player 1, you win!" 72 400 40 Color.white;
+  draw_rectangle 500 0 500 1000 Color.red;
+  draw_text "Player 2, you lost :(" 560 400 40 Color.white
 
-let draw_winner_p2 () (victory_message : string) =
-  clear_background Color.green;
-  draw_text victory_message 300 350 60 Color.white;
-  wait_time 3000.;
-  clear_background Color.red;
-  draw_text "you lose P1 take the L" 300 350 60 Color.white
+let draw_winner_p2 () =
+  clear_background Color.white;
+  draw_rectangle 0 0 500 1000 Color.red;
+  draw_text "Player 1, you lost :(" 72 400 40 Color.white;
+  draw_rectangle 500 0 500 1000 Color.green;
+  draw_text "Player 2, you win!" 560 400 40 Color.white
 
-let draw_winner_none () (victory_message : string) =
+let draw_tie () =
   clear_background Color.blue;
-  draw_text victory_message 300 350 60 Color.white
+  draw_text "It was a tie!" 300 350 60 Color.white
+
+let draw_play_again () =
+  clear_background Color.green;
+  draw_text "Want to play again? Press P" 100 350 40 Color.white
 
 (*Need to add commands for drawing birds and uncovered holes and whatnot*)
 let draw_window bird_textures id p1_state p2_state =
@@ -439,6 +443,10 @@ let draw_window bird_textures id p1_state p2_state =
   | 4 -> draw_player_1_setup p2_state ()
   | 5 -> draw_player_2_setup p1_state ()
   | 6 -> draw_instructions ()
+  | 7 -> draw_winner_p1 ()
+  | 8 -> draw_winner_p2 ()
+  | 9 -> draw_tie ()
+  | 10 -> draw_play_again ()
   | _ -> raise (MalformedWindow "window out of range")
 
 let pp_int_pair ppf (x, y) = Printf.fprintf ppf "(%c,%d)" x y
@@ -475,48 +483,78 @@ let update id p1_state p2_state =
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
     end
-  | 1 ->
-      if is_mouse_button_pressed MouseButton.Left then
-        match get_board_position () with
-        | x, y when click_on_birds x y ->
-            highlight_bird y ();
-            ({ p1_state with selected_bird = get_bird_selection x y }, p2_state)
-        | x, y when click_on_grid x y ->
-            if
-              can_shoot
-                (get_bird_from_species p1_state.bird_list p1_state.selected_bird)
-                (get_grid_coordinate x y) p1_state.grid
-            then (
-              buffer := true;
-              ( shoot_grid
+  | 1 -> (
+      if not (win_condition p1_state p2_state) then
+        if is_mouse_button_pressed MouseButton.Left then
+          match get_board_position () with
+          | x, y when click_on_birds x y ->
+              highlight_bird y ();
+              ( { p1_state with selected_bird = get_bird_selection x y },
+                p2_state )
+          | x, y when click_on_grid x y ->
+              if
+                can_shoot
                   (get_bird_from_species p1_state.bird_list
                      p1_state.selected_bird)
-                  p1_state.grid (get_grid_coordinate x y) p1_state,
-                p2_state ))
-            else (p1_state, p2_state)
-        | x, y -> (p1_state, p2_state)
-      else (p1_state, p2_state)
-  | 2 ->
-      if is_mouse_button_pressed MouseButton.Left then
-        match get_board_position () with
-        | x, y when click_on_birds x y ->
-            highlight_bird y ();
-            (p1_state, { p2_state with selected_bird = get_bird_selection x y })
-        | x, y when click_on_grid x y ->
-            if
-              can_shoot
-                (get_bird_from_species p2_state.bird_list p2_state.selected_bird)
-                (get_grid_coordinate x y) p2_state.grid
-            then (
-              buffer := true;
+                  (get_grid_coordinate x y) p1_state.grid
+              then (
+                buffer := true;
+                ( shoot_grid
+                    (get_bird_from_species p1_state.bird_list
+                       p1_state.selected_bird)
+                    p1_state.grid (get_grid_coordinate x y) p1_state,
+                  p2_state ))
+              else (p1_state, p2_state)
+          | x, y -> (p1_state, p2_state)
+        else (p1_state, p2_state)
+      else
+        match winner p1_state p2_state with
+        | "victory p1" ->
+            window_id := 7;
+            (p1_state, p2_state)
+        | "victory p2" ->
+            window_id := 8;
+            (p1_state, p2_state)
+        | "tie" ->
+            window_id := 9;
+            (p1_state, p2_state)
+        | _ -> failwith "should not reach")
+  | 2 -> (
+      if not (win_condition p1_state p2_state) then
+        if is_mouse_button_pressed MouseButton.Left then
+          match get_board_position () with
+          | x, y when click_on_birds x y ->
+              highlight_bird y ();
               ( p1_state,
-                shoot_grid
+                { p2_state with selected_bird = get_bird_selection x y } )
+          | x, y when click_on_grid x y ->
+              if
+                can_shoot
                   (get_bird_from_species p2_state.bird_list
                      p2_state.selected_bird)
-                  p2_state.grid (get_grid_coordinate x y) p2_state ))
-            else (p1_state, p2_state)
-        | x, y -> (p1_state, p2_state)
-      else (p1_state, p2_state)
+                  (get_grid_coordinate x y) p2_state.grid
+              then (
+                buffer := true;
+                ( p1_state,
+                  shoot_grid
+                    (get_bird_from_species p2_state.bird_list
+                       p2_state.selected_bird)
+                    p2_state.grid (get_grid_coordinate x y) p2_state ))
+              else (p1_state, p2_state)
+          | x, y -> (p1_state, p2_state)
+        else (p1_state, p2_state)
+      else
+        match winner p1_state p2_state with
+        | "victory p1" ->
+            window_id := 7;
+            (p1_state, p2_state)
+        | "victory p2" ->
+            window_id := 8;
+            (p1_state, p2_state)
+        | "tie" ->
+            window_id := 9;
+            (p1_state, p2_state)
+        | _ -> failwith "should not reach")
   | 3 -> (
       match get_key_pressed () with
       | Enter -> (
@@ -555,9 +593,19 @@ let update id p1_state p2_state =
       match get_key_pressed () with
       | P ->
           clear_background Color.raywhite;
-          window_id := 4;
+          window_id := 0;
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
+    end
+  | 7 -> (p1_state, p2_state)
+  | 8 -> (p1_state, p2_state)
+  | 9 -> (p1_state, p2_state)
+  | 10 -> begin
+      match get_key_pressed () with
+      | P ->
+          window_id := 0;
+          (init_state, init_state)
+      | _ -> (init_state, init_state)
     end
   | _ -> raise (MalformedWindow "window out of range")
 
@@ -568,8 +616,6 @@ let rec main_loop () packet =
       begin_drawing ();
       draw_window packet.bird_textures !window_id packet.p1_state
         packet.p2_state;
-      (* let check_win = win_condition packet.p1_state packet.p2_state in if not
-         check_win then ( *)
       let new_state = update !window_id packet.p1_state packet.p2_state in
       end_drawing ();
       match new_state with
@@ -580,10 +626,5 @@ let rec main_loop () packet =
               p1_state = s1;
               p2_state = s2;
             })
-(* else match winner packet.p1_state packet.p2_state with | "victory p1" ->
-   draw_winner_p1 () "victory p1" | "victory p2" -> draw_winner_p2 () "victory
-   p2" | "tie" -> draw_winner_none () "tie" | "should not be called unless
-   someone won/tied" -> failwith "" | _ -> failwith "fuck you"); end_drawing
-   () *)
 
 let () = setup () |> main_loop ()

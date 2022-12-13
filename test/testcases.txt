@@ -3,3 +3,4 @@
 - Check game conditions: one in which a player wins, loses, etc.
 
 
+Check if birds decreases, use state and pigeon
