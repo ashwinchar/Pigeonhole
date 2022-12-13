@@ -390,9 +390,27 @@ let draw_player_2 bird_textures p1_state p2_state () =
 
 let draw_switch () =
   clear_background Color.green;
-  draw_text "pass computer" 300 350 60 Color.white;
+  draw_text "Pass computer" 300 350 60 Color.white;
   draw_text "to opponent" 325 420 60 Color.white;
-  draw_text "press enter to continue" 270 700 40 Color.white
+  draw_text "Press enter to continue" 270 700 40 Color.white
+
+let draw_winner_p1 () (victory_message : string) =
+  clear_background Color.green;
+  draw_text victory_message 300 350 60 Color.white;
+  wait_time 3000.;
+  clear_background Color.red;
+  draw_text "you lose P2 take the L" 300 350 60 Color.white
+
+let draw_winner_p2 () (victory_message : string) =
+  clear_background Color.green;
+  draw_text victory_message 300 350 60 Color.white;
+  wait_time 3000.;
+  clear_background Color.red;
+  draw_text "you lose P1 take the L" 300 350 60 Color.white
+
+let draw_winner_none () (victory_message : string) =
+  clear_background Color.blue;
+  draw_text victory_message 300 350 60 Color.white
 
 (*Need to add commands for drawing birds and uncovered holes and whatnot*)
 let draw_window bird_textures id p1_state p2_state =
@@ -550,6 +568,8 @@ let rec main_loop () packet =
       begin_drawing ();
       draw_window packet.bird_textures !window_id packet.p1_state
         packet.p2_state;
+      (* let check_win = win_condition packet.p1_state packet.p2_state in if not
+         check_win then ( *)
       let new_state = update !window_id packet.p1_state packet.p2_state in
       end_drawing ();
       match new_state with
@@ -560,5 +580,10 @@ let rec main_loop () packet =
               p1_state = s1;
               p2_state = s2;
             })
+(* else match winner packet.p1_state packet.p2_state with | "victory p1" ->
+   draw_winner_p1 () "victory p1" | "victory p2" -> draw_winner_p2 () "victory
+   p2" | "tie" -> draw_winner_none () "tie" | "should not be called unless
+   someone won/tied" -> failwith "" | _ -> failwith "fuck you"); end_drawing
+   () *)
 
 let () = setup () |> main_loop ()

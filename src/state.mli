@@ -100,3 +100,6 @@ val switch_mode : state -> state -> state * state
 val get_bird_from_species :
   Pigeon.bird list -> Pigeon.bird_species -> Pigeon.bird
 (**Returns bird from [bird_list] with the same species as [spec]*)
+
+val win_condition : state -> state -> bool
+val winner : state -> state -> string

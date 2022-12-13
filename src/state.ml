@@ -171,3 +171,16 @@ let rec get_bird_from_species bird_list spec =
   | { species; points; birds_left } :: t when species = spec ->
       { species; points; birds_left }
   | h :: t -> get_bird_from_species t spec
+
+let win_condition p1 p2 =
+  match (num_holes_hit p1.hit_list, num_holes_hit p2.hit_list) with
+  | 10, _ | _, 10 -> true
+  | _, _ -> false
+
+let winner p1 p2 =
+  match win_condition p1 p2 with
+  | true ->
+      if p1.score > p2.score then "victory p1"
+      else if p2.score > p1.score then "victory p2"
+      else "tie"
+  | false -> failwith "should not be called unless someone won/tied"
