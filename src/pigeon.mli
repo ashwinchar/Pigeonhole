@@ -95,9 +95,9 @@ val make_grid :
 val get_col_list :
   int list -> char -> int -> int -> (int * char) list -> (int * char) list
 (**[get_col_list row col row1 row2 out] is a list of coordinates each where
-   column ouutputted corresponds to a row between row1 and row2.*)
+   column outputted corresponds to a row between row1 and row2.*)
 
 val get_row_list :
   int -> char list -> char -> char -> (int * char) list -> (int * char) list
 (**[get_row_list row col col1 col2 out] is a list of coordinates each where row
-   ouutputted corresponds to a column between col1 and col2.*)
+   outputted corresponds to a column between col1 and col2.*)

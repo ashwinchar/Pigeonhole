@@ -10,7 +10,7 @@ open OUnit2
     desired behavior. We believe this test unit demonstrates the correctness of
     our system because the vast majority of test cases because we feel we've
     tested most possible branches and tried to follow glass-box testing
-    strategies/ *)
+    strategies *)
 
 open Pigeonholegame
 open State
