@@ -1,6 +1,0 @@
-- Add test cases for detecting a mouse click on a box
-- Check data structure after a box is clicked
-- Check game conditions: one in which a player wins, loses, etc.
-
-
-Check if birds decreases, use state and pigeon
