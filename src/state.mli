@@ -103,3 +103,5 @@ val get_bird_from_species :
 
 val win_condition : state -> state -> bool
 val winner : state -> state -> string
+val random_element : 'a list -> 'a
+val randomize : 'a -> state -> state

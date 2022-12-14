@@ -1,6 +1,7 @@
 open Pigeon
 
 exception TurnException
+exception NotInGrid
 
 type game_mode =
   | Setup
@@ -184,3 +185,21 @@ let winner p1 p2 =
       else if p2.score > p1.score then "victory p2"
       else "tie"
   | false -> failwith "should not be called unless someone won/tied"
+
+let random_element l = List.nth l (Random.int (List.length l))
+
+let rec randomize player_state opponent_state =
+  let random_row = random_element rows in
+  let random_column = random_element columns in
+  if opponent_state.holes_on_board >= 10 then (
+    player_state;
+    opponent_state)
+  else
+    match BirdMapping.find (random_column, random_row) opponent_state.grid with
+    | Some { occupied = true; shot_at } ->
+        player_state;
+        opponent_state
+    | Some { occupied = false; shot_at } ->
+        randomize player_state
+          (set_hole (random_column, random_row) opponent_state)
+    | None -> raise NotInGrid

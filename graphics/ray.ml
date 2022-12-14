@@ -586,14 +586,21 @@ let update id p1_state p2_state =
   | 4 ->
       if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
-        | x, y -> update_set_holes x y p1_state p2_state 3
+        | x, y when click_on_grid x y ->
+            update_set_holes x y p1_state p2_state 3
+        | x, y when click_on_random x y ->
+            (p1_state, randomize p1_state p2_state)
+        | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
   | 5 ->
       if is_mouse_button_pressed MouseButton.Left then
         match get_board_position () with
-        | x, y ->
+        | x, y when click_on_grid x y ->
             ( snd (update_set_holes x y p2_state p1_state 3),
               fst (update_set_holes x y p2_state p1_state 3) )
+        | x, y when click_on_random x y ->
+            (randomize p2_state p1_state, p2_state)
+        | x, y -> (p1_state, p2_state)
       else (p1_state, p2_state)
   | 6 -> begin
       match get_key_pressed () with
