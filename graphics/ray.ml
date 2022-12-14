@@ -334,7 +334,7 @@ let draw_player_1_setup p2_state () =
   draw_text "Player 1" 675 100 60 Color.red;
   if p2_state.holes_on_board = 10 then (
     clear_background Color.raywhite;
-    window_id := 5)
+    window_id := 3)
 
 let draw_player_2_setup p1_state () =
   if p1_state.holes_on_board = 0 then clear_background Color.raywhite;
