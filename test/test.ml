@@ -1,16 +1,16 @@
 open OUnit2
-(** Wrote tests for the majority of functions written inside of the Pigeon and
-    State compilation units. Decided to test those functions because we wanted
-    to focus on testing the backend of our game to ensure the functionality is
-    working properly. We decided to omit testing functions inside of the
-    graphics folder (ray.ml) because a better way for us to test the frontend
-    and drawing is to play and try to break the game while testing, since we can
-    see what it does. Since we can't physically see what the functions defined
-    inside of state and pigeon do we need to test them to see if they follow
-    desired behavior. We believe this test unit demonstrates the correctness of
-    our system because the vast majority of test cases because we feel we've
-    tested most possible branches and tried to follow glass-box testing
-    strategies *)
+(** Test Plan: Wrote tests for the majority of functions written inside of the
+    Pigeon and State compilation units. Decided to test those functions because
+    we wanted to focus on testing the backend of our game to ensure the
+    functionality is working properly. We decided to omit testing functions
+    inside of the graphics folder (ray.ml) because a better way for us to test
+    the frontend and drawing is to play and try to break the game while testing,
+    since we can see what it does. Since we can't physically see what the
+    functions defined inside of state and pigeon do we need to test them to see
+    if they follow desired behavior. We believe this test unit demonstrates the
+    correctness of our system because the vast majority of test cases because we
+    feel we've tested most possible branches and tried to follow glass-box
+    testing strategies *)
 
 open Pigeonholegame
 open State
