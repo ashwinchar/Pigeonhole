@@ -7,10 +7,10 @@ open OUnit2
     the frontend and drawing is to play and try to break the game while testing,
     since we can see what it does. Since we can't physically see what the
     functions defined inside of state and pigeon do we need to test them to see
-    if they follow desired behavior. We believe this test unit demonstrates the
-    correctness of our system because the vast majority of test cases because we
-    feel we've tested most possible branches and tried to follow glass-box
-    testing strategies *)
+    if they follow desired behavior. Used a glass-box testing strategy to test
+    program correctness by trying to hit all branches of program flow. We
+    believe this test unit demonstrates the correctness by attempting to
+    extensively test all branches of the important backend functions. *)
 
 open Pigeonholegame
 open State
