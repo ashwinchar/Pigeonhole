@@ -186,7 +186,9 @@ let winner p1 p2 =
       else "tie"
   | false -> failwith "should not be called unless someone won/tied"
 
-let random_element l = List.nth l (Random.int (List.length l))
+let random_element l =
+  Random.self_init ();
+  List.nth l (Random.int (List.length l))
 
 let rec randomize player_state opponent_state =
   let random_row = random_element rows in
