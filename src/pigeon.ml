@@ -89,9 +89,9 @@ let rec get_col_list (row : int list) (col : char) (row1 : int) (row2 : int) out
   | h :: t -> get_col_list t col row1 row2 out
 
 let rec get_row_list (row : int) (col : char list) (col1 : char) (col2 : char)
-    outlist =
+    out =
   match col with
-  | [] -> outlist
+  | [] -> out
   | h :: t when h >= col1 && h <= col2 ->
-      get_row_list row t col1 col2 ((row, h) :: outlist)
-  | h :: t -> get_row_list row t col1 col2 outlist
+      get_row_list row t col1 col2 ((row, h) :: out)
+  | h :: t -> get_row_list row t col1 col2 out

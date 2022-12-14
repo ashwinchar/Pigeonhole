@@ -67,14 +67,6 @@ val num_holes_hit : 'a list -> int
 (** [num_holes_hit hole_hit_list] is the number of holes that are in
     [hole_hit_list] *)
 
-val shoot_grid_helper :
-  Pigeon.bird ->
-  ((char * int) * Pigeon.grid_square) list ->
-  Pigeon.coord ->
-  Pigeon.BirdMapping.t ->
-  state ->
-  Pigeon.BirdMapping.t
-
 val shoot_grid :
   Pigeon.bird ->
   ((char * int) * Pigeon.grid_square) list ->
@@ -102,6 +94,17 @@ val get_bird_from_species :
 (** Returns bird from [bird_list] with the same species as [spec] *)
 
 val win_condition : state -> state -> bool
+(**[win_condition p1 p2] outputs wether or not either player's state, [p1] or
+   [p2], has reached the win condition of finding all 10 holes*)
+
 val winner : state -> state -> string
+(**[winner p1 p2] outputs a string corresnponding to which player has won based
+   off the player's, [p1] or [p2], [state.score]*)
+
 val random_element : 'a list -> 'a
+(**[random_element l] outputs a random element from the list l*)
+
 val randomize : 'a -> state -> state
+(**[randomize player_state opponent_state] outputs the [opponent_state] after
+   the grid has been randomized by setting 10 holes using coordinates from
+   [random_element]*)
