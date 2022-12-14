@@ -1,4 +1,17 @@
 open OUnit2
+(** Wrote tests for the majority of functions written inside of the Pigeon and
+    State compilation units. Decided to test those functions because we wanted
+    to focus on testing the backend of our game to ensure the functionality is
+    working properly. We decided to omit testing functions inside of the
+    graphics folder (ray.ml) because a better way for us to test the frontend
+    and drawing is to play and try to break the game while testing, since we can
+    see what it does. Since we can't physically see what the functions defined
+    inside of state and pigeon do we need to test them to see if they follow
+    desired behavior. We believe this test unit demonstrates the correctness of
+    our system because the vast majority of test cases because we feel we've
+    tested most possible branches and tried to follow glass-box testing
+    strategies/ *)
+
 open Pigeonholegame
 open State
 open Pigeon
@@ -34,6 +47,10 @@ let get_bird_from_species_test (name : string) (bdl : bird list)
 let winner_test (name : string) (s1 : state) (s2 : state)
     (expected_output : string) : test =
   name >:: fun _ -> assert_equal expected_output (winner s1 s2)
+
+let num_holes_hit_test (name : string) (lst : 'a list) (expected_output : int) :
+    test =
+  name >:: fun _ -> assert_equal expected_output (num_holes_hit lst)
 
 module M = BirdMapping
 
@@ -305,6 +322,9 @@ let testing =
     winner_test "Expected player2 winner message" mockstate5 mockstate7
       "victory p2";
     winner_test "Expected tie" mockstate7 mockstate6 "tie";
+    num_holes_hit_test "No holes hit test" [] 0;
+    num_holes_hit_test "1 hole hit" [ ('a', 2) ] 1;
+    num_holes_hit_test "2 holes hit" [ ('a', 2); ('b', 2) ] 2;
   ]
 
 let tests = "Pigeonhole tests" >::: List.flatten [ testing ]
