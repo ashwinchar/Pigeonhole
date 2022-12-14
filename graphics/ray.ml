@@ -606,7 +606,7 @@ let update id p1_state p2_state =
       match get_key_pressed () with
       | P ->
           clear_background Color.raywhite;
-          window_id := 0;
+          window_id := 4;
           (p1_state, p2_state)
       | _ -> (p1_state, p2_state)
     end
