@@ -12,7 +12,7 @@ Pigeonhole is a graphics based game similar to the children's game Battleship. T
 <img src="https://user-images.githubusercontent.com/35634836/210024143-df05b74a-daca-45e6-995b-66b156a0cbe3.png" width="500" height="500"></img>
 
 ## Gameplay
-<img src="https://user-images.githubusercontent.com/35634836/210024102-f5767a9d-e9ec-4214-bc76-4b7301b5d2a0.gif" width="500" height="500/></img>
+![3d6618c618c81b1d21a83d8d2bafb100e291ec63](https://user-images.githubusercontent.com/35634836/210026300-b224fb92-e2fe-4ebc-ba80-19362a295818.gif)
 
 ## How To Play
 1. Download or clone the files from this repository
